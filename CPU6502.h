@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <functional>
+
 #ifdef LOGMODE
 #include <stdio.h>
 #endif
@@ -66,12 +68,31 @@ private:
 	uint8_t fetch();
 
 	// Helper functions:
-
-	// Helper function for branch instructions
 	void branch(bool condition);
 	void load(uint8_t& var);
 	void transfer(uint8_t& src, uint8_t& dest);
 	void logical(char op, uint8_t& var);
+	void fetchAndCompare(uint16_t var);
+	void incrementRegister(uint8_t& var);
+	void decrementRegister(uint8_t& var);
+
+	template <typename T, typename S>
+	void shift(const T& shiftFn, const S& cflagFn) {
+		fetch();
+		shiftFn();
+		cflagFn();
+		setZifZero(m_temp & 0x00FF);
+		setNifMsbSet(m_temp & 0x80);
+		if (m_lookup[m_opcode].addrmode == &CPU6502::IMP) {
+			m_a = m_temp & 0x00FF;
+		}
+		else {
+			write(m_addrAbs, m_temp & 0x00FF);
+		}
+	};
+
+	//----------------------------
+
 
 	// Will set Z flag is var is not set
 	void setZifZero(const uint8_t var);

@@ -401,8 +401,8 @@ uint8_t CPU6502::TYA()
 uint8_t CPU6502::TSX()
 {
 	m_x = m_stkp;
-	setFlag(Z, m_x == 0x00);
-	setFlag(N, m_x & 0x80);
+	setZifZero(m_x);
+	setNifMsbSet(m_x);
 	return 0;
 }
 
@@ -430,8 +430,8 @@ uint8_t CPU6502::PLA()
 {
 	m_stkp++;
 	m_a = read(0x0100 + m_stkp);
-	setFlag(Z, m_a == 0x00);
-	setFlag(N, m_a & 0x80);
+	setZifZero(m_a);
+	setNifMsbSet(m_a);
 	return 0;
 }
 uint8_t CPU6502::PLP()
@@ -510,9 +510,9 @@ uint8_t CPU6502::ADC()
 	fetch();
 	m_temp = (uint16_t)m_a + (uint16_t)m_fetched + (uint16_t)getFlag(C);
 	setFlag(C, m_temp > 255);
-	setFlag(Z, (m_temp & 0x00FF) == 0);
+	setZifZero(m_temp & 0x00FF);
 	setFlag(V, (~((uint16_t)m_a ^ (uint16_t)m_fetched) & ((uint16_t)m_a ^ (uint16_t)m_temp)) & 0x0080);
-	setFlag(N, m_temp & 0x80);
+	setNifMsbSet(m_temp);
 	m_a = m_temp & 0x00FF;
 	return 1;
 }
@@ -523,38 +523,35 @@ uint8_t CPU6502::SBC()
 	uint16_t value = ((uint16_t)m_fetched) ^ 0x00FF;
 	m_temp = (uint16_t)m_a + value + (uint16_t)getFlag(C);
 	setFlag(C, m_temp & 0xFF00);
-	setFlag(Z, ((m_temp & 0x00FF) == 0));
+	setZifZero(m_temp & 0x00FF);
 	setFlag(V, (m_temp ^ (uint16_t)m_a) & (m_temp ^ value) & 0x0080);
-	setFlag(N, m_temp & 0x0080);
+	setNifMsbSet(m_temp);
 	m_a = m_temp & 0x00FF;
 	return 1;
 }
 
+// Helper function for compare instructions
+void CPU6502::fetchAndCompare(uint16_t var) {
+	fetch();
+	m_temp = var - static_cast<uint16_t>(m_fetched);
+	setFlag(C, var >= m_fetched);
+	setZifZero(m_temp & 0x00FF);
+	setNifMsbSet(m_temp);
+}
+
 uint8_t CPU6502::CMP()
 {
-	fetch();
-	m_temp = (uint16_t)m_a - (uint16_t)m_fetched;
-	setFlag(C, m_a >= m_fetched);
-	setFlag(Z, (m_temp & 0x00FF) == 0x0000);
-	setFlag(N, m_temp & 0x0080);
+	fetchAndCompare(m_a);
 	return 1;
 }
 uint8_t CPU6502::CPX()
 {
-	fetch();
-	m_temp = (uint16_t)m_x - (uint16_t)m_fetched;
-	setFlag(C, m_x >= m_fetched);
-	setFlag(Z, (m_temp & 0x00FF) == 0x0000);
-	setFlag(N, m_temp & 0x0080);
+	fetchAndCompare(m_x);
 	return 0;
 }
 uint8_t CPU6502::CPY()
 {
-	fetch();
-	m_temp = (uint16_t)m_y - (uint16_t)m_fetched;
-	setFlag(C, m_y >= m_fetched);
-	setFlag(Z, (m_temp & 0x00FF) == 0x0000);
-	setFlag(N, m_temp & 0x0080);
+	fetchAndCompare(m_y);
 	return 0;
 }
 
@@ -562,27 +559,40 @@ uint8_t CPU6502::CPY()
 // Increments & Decrements
 //------------------------
 
-uint8_t CPU6502::INC()
+void CPU6502::incrementRegister(uint8_t& var)
 {
-	fetch();
-	m_temp = m_fetched + 1;
-	write(m_addrAbs, m_temp & 0x00FF);
-	setFlag(Z, (m_temp & 0x00FF) == 0x0000);
-	setFlag(N, m_temp & 0x0080);
+	++var;
+	setZifZero(var);
+	setNifMsbSet(var);
+}
+
+void CPU6502::decrementRegister(uint8_t& var)
+{
+	--var;
+	setZifZero(var);
+	setNifMsbSet(var);
+}
+
+
+uint8_t CPU6502::DEX()
+{
+	decrementRegister(m_x);
 	return 0;
 }
+uint8_t CPU6502::DEY()
+{
+	decrementRegister(m_y);
+	return 0;
+}
+
 uint8_t CPU6502::INX()
 {
-	m_x++;
-	setFlag(Z, m_x == 0x00);
-	setFlag(N, m_x & 0x80);
+	incrementRegister(m_x);
 	return 0;
 }
 uint8_t CPU6502::INY()
 {
-	m_y++;
-	setFlag(Z, m_y == 0x00);
-	setFlag(N, m_y & 0x80);
+	incrementRegister(m_y);
 	return 0;
 }
 
@@ -591,22 +601,18 @@ uint8_t CPU6502::DEC()
 	fetch();
 	m_temp = m_fetched - 1;
 	write(m_addrAbs, m_temp & 0x00FF);
-	setFlag(Z, (m_temp & 0x00FF) == 0x0000);
-	setFlag(N, m_temp & 0x0080);
+	setZifZero(m_temp & 0x00FF);
+	setNifMsbSet(m_temp);
 	return 0;
 }
-uint8_t CPU6502::DEX()
+
+uint8_t CPU6502::INC()
 {
-	m_x--;
-	setFlag(Z, m_x == 0x00);
-	setFlag(N, m_x & 0x80);
-	return 0;
-}
-uint8_t CPU6502::DEY()
-{
-	m_y--;
-	setFlag(Z, m_y == 0x00);
-	setFlag(N, m_y & 0x80);
+	fetch();
+	m_temp = m_fetched + 1;
+	write(m_addrAbs, m_temp & 0x00FF);
+	setZifZero(m_temp & 0x00FF);
+	setNifMsbSet(m_temp);
 	return 0;
 }
 
@@ -617,7 +623,7 @@ uint8_t CPU6502::DEY()
 
 uint8_t CPU6502::ASL()
 {
-	fetch();
+	/*fetch();
 	m_temp = (uint16_t)m_fetched << 1;
 	setFlag(C, (m_temp & 0xFF00) > 0);
 	setFlag(Z, (m_temp & 0x00FF) == 0x00);
@@ -625,15 +631,22 @@ uint8_t CPU6502::ASL()
 	if (m_lookup[m_opcode].addrmode == &CPU6502::IMP)
 		m_a = m_temp & 0x00FF;
 	else
-		write(m_addrAbs, m_temp & 0x00FF);
+		write(m_addrAbs, m_temp & 0x00FF);*/
+
+	shift(
+		[=](){ m_temp = static_cast<uint16_t>(m_fetched << 1); },
+		[=](){ setFlag(C, (m_temp & 0xFF00) > 0); }
+	);
+
+
 	return 0;
 }
 
 uint8_t CPU6502::LSR()
 {
 	fetch();
-	setFlag(C, m_fetched & 0x0001);
 	m_temp = m_fetched >> 1;
+	setFlag(C, m_fetched & 0x0001);
 	setFlag(Z, (m_temp & 0x00FF) == 0x00);
 	setFlag(N, m_temp & 0x0080);
 	if (m_lookup[m_opcode].addrmode == &CPU6502::IMP)
