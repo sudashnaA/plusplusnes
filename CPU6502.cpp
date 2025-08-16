@@ -1,5 +1,6 @@
 #include "CPU6502.h"
 #include "Bus.h"
+#include "constants.h"
 
 CPU6502::CPU6502()
 {
@@ -130,7 +131,7 @@ void CPU6502::irq()
 {
 	if (getFlag(I) == 0)
 	{
-		write(0x0100 + m_stkp, (m_pc >> 8) & 0x00FF);
+		write(0x0100 + m_stkp, (m_pc >> eight_bits) & 0x00FF);
 		m_stkp--;
 		write(0x0100 + m_stkp, m_pc & 0x00FF);
 		m_stkp--;
@@ -142,13 +143,13 @@ void CPU6502::irq()
 		m_addrAbs = 0xFFFE;
 		uint16_t lo = read(m_addrAbs + 0);
 		uint16_t hi = read(m_addrAbs + 1);
-		m_pc = (hi << 8) | lo;
+		m_pc = (hi << eight_bits) | lo;
 		m_cycles = 7;
 	}
 }
 void CPU6502::nmi()
 {
-	write(0x0100 + m_stkp, (m_pc >> 8) & 0x00FF);
+	write(0x0100 + m_stkp, (m_pc >> eight_bits) & 0x00FF);
 	m_stkp--;
 	write(0x0100 + m_stkp, m_pc & 0x00FF);
 	m_stkp--;
@@ -162,7 +163,7 @@ void CPU6502::nmi()
 	m_addrAbs = 0xFFFA;
 	uint16_t lo = read(m_addrAbs + 0);
 	uint16_t hi = read(m_addrAbs + 1);
-	m_pc = (hi << 8) | lo;
+	m_pc = (hi << eight_bits) | lo;
 
 	m_cycles = 8;
 }
@@ -178,7 +179,7 @@ uint8_t CPU6502::ABS()
 	uint16_t hi = read(m_pc);
 	m_pc++;
 
-	m_addrAbs = (hi << 8) | lo;
+	m_addrAbs = (hi << eight_bits) | lo;
 
 	return 0;
 }
@@ -190,10 +191,10 @@ uint8_t CPU6502::ABX()
 	uint16_t hi = read(m_pc);
 	m_pc++;
 
-	m_addrAbs = (hi << 8) | lo;
+	m_addrAbs = (hi << eight_bits) | lo;
 	m_addrAbs += m_x;
 
-	if ((m_addrAbs & 0xFF00) != (hi << 8))
+	if ((m_addrAbs & 0xFF00) != (hi << eight_bits))
 		return 1;
 	else
 		return 0;
@@ -206,10 +207,10 @@ uint8_t CPU6502::ABY()
 	uint16_t hi = read(m_pc);
 	m_pc++;
 
-	m_addrAbs = (hi << 8) | lo;
+	m_addrAbs = (hi << eight_bits) | lo;
 	m_addrAbs += m_y;
 
-	if ((m_addrAbs & 0xFF00) != (hi << 8))
+	if ((m_addrAbs & 0xFF00) != (hi << eight_bits))
 		return 1;
 	else
 		return 0;
@@ -222,15 +223,15 @@ uint8_t CPU6502::IND()
 	uint16_t ptr_hi = read(m_pc);
 	m_pc++;
 
-	uint16_t ptr = (ptr_hi << 8) | ptr_lo;
+	uint16_t ptr = (ptr_hi << eight_bits) | ptr_lo;
 
 	if (ptr_lo == 0x00FF)
 	{
-		m_addrAbs = (read(ptr & 0xFF00) << 8) | read(ptr + 0);
+		m_addrAbs = (read(ptr & 0xFF00) << eight_bits) | read(ptr + 0);
 	}
 	else
 	{
-		m_addrAbs = (read(ptr + 1) << 8) | read(ptr + 0);
+		m_addrAbs = (read(ptr + 1) << eight_bits) | read(ptr + 0);
 	}
 
 	return 0;
@@ -244,7 +245,7 @@ uint8_t CPU6502::IZX()
 	uint16_t lo = read((uint16_t)(t + (uint16_t)m_x) & 0x00FF);
 	uint16_t hi = read((uint16_t)(t + (uint16_t)m_x + 1) & 0x00FF);
 
-	m_addrAbs = (hi << 8) | lo;
+	m_addrAbs = (hi << eight_bits) | lo;
 
 	return 0;
 }
@@ -257,10 +258,10 @@ uint8_t CPU6502::IZY()
 	uint16_t lo = read(t & 0x00FF);
 	uint16_t hi = read((t + 1) & 0x00FF);
 
-	m_addrAbs = (hi << 8) | lo;
+	m_addrAbs = (hi << eight_bits) | lo;
 	m_addrAbs += m_y;
 
-	if ((m_addrAbs & 0xFF00) != (hi << 8))
+	if ((m_addrAbs & 0xFF00) != (hi << eight_bits))
 		return 1;
 	else
 		return 0;
@@ -495,8 +496,8 @@ uint8_t CPU6502::BIT()
 	fetch();
 	m_temp = m_a & m_fetched;
 	setZifZero(m_temp & 0x00FF);
-	setFlag(N, m_fetched & (1 << 7));
-	setFlag(V, m_fetched & (1 << 6));
+	setFlag(N, m_fetched & (1 << seven_bits));
+	setFlag(V, m_fetched & (1 << six_bits));
 	return 0;
 }
 
@@ -625,7 +626,7 @@ uint8_t CPU6502::ASL()
 {
 	shift(
 		// shift the fetched byte to the left
-		[=](){ m_temp = static_cast<uint16_t>(m_fetched << 1); },
+		[=](){ m_temp = static_cast<uint16_t>(m_fetched << one_bit); },
 
 		[=](){ setFlag(C, (m_temp & 0xFF00) > 0); }
 	);
@@ -637,7 +638,7 @@ uint8_t CPU6502::LSR()
 {
 	shift(
 		// shift the fetched byte the right
-		[=]() { m_temp = static_cast<uint16_t>(m_fetched >> 1); },
+		[=]() { m_temp = static_cast<uint16_t>(m_fetched >> one_bit); },
 
 		[=]() { setFlag(C, m_fetched & 0x0001); }
 	);
@@ -649,7 +650,7 @@ uint8_t CPU6502::ROL()
 {
 	shift(
 		// shift the fetched byte the left by one and OR with the value of the C flag
-		[=]() { m_temp = static_cast<uint16_t>(m_fetched << 1) | getFlag(C); },
+		[=]() { m_temp = static_cast<uint16_t>(m_fetched << one_bit) | getFlag(C); },
 
 		[=]() { setFlag(C, m_temp & 0xFF00); }
 	);
@@ -661,7 +662,7 @@ uint8_t CPU6502::ROR()
 {
 	shift(
 		// set the value of the carry flag to be MSB, 
-		[=]() { m_temp = static_cast<uint16_t>(getFlag(C) << 7) | (m_fetched >> 1); },
+		[=]() { m_temp = static_cast<uint16_t>(getFlag(C) << seven_bits) | (m_fetched >> one_bit); },
 
 		[=]() { setFlag(C, m_fetched & 0x01); }
 	);
@@ -680,12 +681,12 @@ uint8_t CPU6502::JMP()
 }
 uint8_t CPU6502::JSR()
 {
-	m_pc--;
+	--m_pc;
 
-	write(0x0100 + m_stkp, (m_pc >> 8) & 0x00FF);
-	m_stkp--;
+	write(0x0100 + m_stkp, (m_pc >> eight_bits) & 0x00FF);
+	--m_stkp;
 	write(0x0100 + m_stkp, m_pc & 0x00FF);
-	m_stkp--;
+	--m_stkp;
 
 	m_pc = m_addrAbs;
 	return 0;
@@ -693,12 +694,12 @@ uint8_t CPU6502::JSR()
 
 uint8_t CPU6502::RTS()
 {
-	m_stkp++;
+	++m_stkp;
 	m_pc = (uint16_t)read(0x0100 + m_stkp);
-	m_stkp++;
-	m_pc |= (uint16_t)read(0x0100 + m_stkp) << 8;
+	++m_stkp;
+	m_pc |= (uint16_t)read(0x0100 + m_stkp) << eight_bits;
 
-	m_pc++;
+	++m_pc;
 	return 0;
 }
 
@@ -710,11 +711,11 @@ uint8_t CPU6502::RTS()
 void CPU6502::branch(bool condition) {
 	if (condition)
 	{
-		m_cycles++;
+		++m_cycles;
 		m_addrAbs = m_pc + m_addrRel;
 
 		if ((m_addrAbs & 0xFF00) != (m_pc & 0xFF00))
-			m_cycles++;
+			++m_cycles;
 
 		m_pc = m_addrAbs;
 	}
@@ -816,20 +817,20 @@ uint8_t CPU6502::SEI()
 
 uint8_t CPU6502::BRK()
 {
-	m_pc++;
+	++m_pc;
 
 	setFlag(I, 1);
-	write(0x0100 + m_stkp, (m_pc >> 8) & 0x00FF);
-	m_stkp--;
+	write(0x0100 + m_stkp, (m_pc >> eight_bits) & 0x00FF);
+	--m_stkp;
 	write(0x0100 + m_stkp, m_pc & 0x00FF);
-	m_stkp--;
+	--m_stkp;
 
 	setFlag(B, 1);
 	write(0x0100 + m_stkp, m_status);
-	m_stkp--;
+	--m_stkp;
 	setFlag(B, 0);
 
-	m_pc = (uint16_t)read(0xFFFE) | ((uint16_t)read(0xFFFF) << 8);
+	m_pc = static_cast<uint16_t>(read(0xFFFE)) | static_cast<uint16_t>(read(0xFFFF) << eight_bits);
 	return 0;
 }
 
@@ -850,15 +851,15 @@ uint8_t CPU6502::NOP()
 
 uint8_t CPU6502::RTI()
 {
-	m_stkp++;
+	++m_stkp;
 	m_status = read(0x0100 + m_stkp);
 	m_status &= ~B;
 	m_status &= ~U;
 
-	m_stkp++;
-	m_pc = (uint16_t)read(0x0100 + m_stkp);
-	m_stkp++;
-	m_pc |= (uint16_t)read(0x0100 + m_stkp) << 8;
+	++m_stkp;
+	m_pc = static_cast<uint16_t>(read(0x0100 + m_stkp));
+	++m_stkp;
+	m_pc |= static_cast<uint16_t>(read(0x0100 + m_stkp) << eight_bits);
 	return 0;
 }
 
