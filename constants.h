@@ -1,5 +1,8 @@
 #pragma once
 
+inline constexpr uint8_t STKP_INITIAL_VALUE{ 0xFD };
+inline constexpr uint16_t ADDR_ABS_INITIAL_VALUE{ 0xFFFC };
+
 enum BitShift {
     zero_bits,
     one_bit,

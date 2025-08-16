@@ -61,10 +61,10 @@ private:
 	uint32_t m_clockCount = 0;
 	Bus* bus = nullptr;
 
-	uint8_t getFlag(FLAGS6502 f) const;
-	void    setFlag(FLAGS6502 f, bool v);
-	uint8_t read(uint16_t a) const;
-	void    write(uint16_t a, uint8_t d);
+	uint8_t getFlag(FLAGS6502 flag) const;
+	void    setFlag(FLAGS6502 flag, bool val);
+	uint8_t read(uint16_t addr) const;
+	void    write(uint16_t addr, uint8_t data);
 	uint8_t fetch();
 
 	// Helper functions:

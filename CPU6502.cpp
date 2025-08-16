@@ -32,18 +32,18 @@ CPU6502::~CPU6502()
 
 void CPU6502::reset()
 {
-	m_addrAbs = 0xFFFC;
+	m_addrAbs = ADDR_ABS_INITIAL_VALUE;
 	uint16_t lo = read(m_addrAbs + 0);
 	uint16_t hi = read(m_addrAbs + 1);
 	m_pc = (hi << 8) | lo;
 	m_a = 0;
 	m_x = 0;
 	m_y = 0;
-	m_stkp = 0xFD;
-	m_status = 0x00 | U;
-	m_addrRel = 0x0000;
-	m_addrAbs = 0x0000;
-	m_fetched = 0x00;
+	m_stkp = STKP_INITIAL_VALUE;
+	m_status = 0 | U;
+	m_addrRel = 0;
+	m_addrAbs = 0;
+	m_fetched = 0;
 	m_cycles = 8;
 }
 
@@ -53,31 +53,16 @@ void CPU6502::clock()
 	{
 		m_opcode = read(m_pc);
 
-#ifdef LOGMODE
-		uint16_t log_pc = pc;
-#endif
 		setFlag(U, true);
 		m_pc++;
 		m_cycles = m_lookup[m_opcode].cycles;
-		uint8_t additional_cycle1 = (this->*m_lookup[m_opcode].addrmode)();
-		uint8_t additional_cycle2 = (this->*m_lookup[m_opcode].operate)();
+		uint8_t additional_cycle1{ (this->*m_lookup[m_opcode].addrmode)() };
+		uint8_t additional_cycle2{(this->*m_lookup[m_opcode].operate)() };
 		m_cycles += (additional_cycle1 & additional_cycle2);
 		setFlag(U, true);
-
-#ifdef LOGMODE
-		if (logfile == nullptr)	logfile = fopen("CPU6502.txt", "wt");
-		if (logfile != nullptr)
-		{
-			fprintf(logfile, "%10d:%02d PC:%04X %s A:%02X X:%02X Y:%02X %s%s%s%s%s%s%s%s STKP:%02X\n",
-				clock_count, 0, log_pc, "XXX", a, x, y,
-				getFlag(N) ? "N" : ".", getFlag(V) ? "V" : ".", getFlag(U) ? "U" : ".",
-				getFlag(B) ? "B" : ".", getFlag(D) ? "D" : ".", getFlag(I) ? "I" : ".",
-				getFlag(Z) ? "Z" : ".", getFlag(C) ? "C" : ".", stkp);
-		}
-#endif
 	}
-	m_clockCount++;
-	m_cycles--;
+	++m_clockCount;
+	--m_cycles;
 }
 
 
@@ -89,33 +74,37 @@ void CPU6502::clock()
 
 // Helper functions
 
-uint8_t CPU6502::read(uint16_t a) const
+uint8_t CPU6502::read(uint16_t addr) const
 {
-	return bus->cpuRead(a, false);
+	return bus->cpuRead(addr, false);
 }
 
-void CPU6502::write(uint16_t a, uint8_t d)
+void CPU6502::write(uint16_t addr, uint8_t data)
 {
-	bus->cpuWrite(a, d);
+	bus->cpuWrite(addr, data);
 }
 
-uint8_t CPU6502::getFlag(FLAGS6502 f) const
+uint8_t CPU6502::getFlag(FLAGS6502 flag) const
 {
-	return ((m_status & f) > 0) ? 1 : 0;
+	return ((m_status & flag) > 0) ? 1 : 0;
 }
 
-void CPU6502::setFlag(FLAGS6502 f, bool v)
+void CPU6502::setFlag(FLAGS6502 flag, bool value)
 {
-	if (v)
-		m_status |= f;
-	else
-		m_status &= ~f;
+	if (value) {
+		m_status |= flag;
+	}
+	else {
+		m_status &= ~flag;
+	}
 }
 
 uint8_t CPU6502::fetch()
 {
-	if (!(m_lookup[m_opcode].addrmode == &CPU6502::IMP))
+	if (!(m_lookup[m_opcode].addrmode == &CPU6502::IMP)) {
 		m_fetched = read(m_addrAbs);
+	}
+
 	return m_fetched;
 }
 
@@ -132,14 +121,14 @@ void CPU6502::irq()
 	if (getFlag(I) == 0)
 	{
 		write(0x0100 + m_stkp, (m_pc >> eight_bits) & 0x00FF);
-		m_stkp--;
+		--m_stkp;
 		write(0x0100 + m_stkp, m_pc & 0x00FF);
-		m_stkp--;
+		--m_stkp;
 		setFlag(B, 0);
 		setFlag(U, 1);
 		setFlag(I, 1);
 		write(0x0100 + m_stkp, m_status);
-		m_stkp--;
+		--m_stkp;
 		m_addrAbs = 0xFFFE;
 		uint16_t lo = read(m_addrAbs + 0);
 		uint16_t hi = read(m_addrAbs + 1);
@@ -885,7 +874,7 @@ std::map<uint16_t, std::string> CPU6502::disassemble(uint16_t nStart, uint16_t n
 	auto hex = [](uint32_t n, uint8_t d)
 		{
 			std::string s(d, '0');
-			for (int i = d - 1; i >= 0; i--, n >>= 4)
+			for (int i = d - 1; i >= 0; i--, n >>= four_bits)
 				s[i] = "0123456789ABCDEF"[n & 0xF];
 			return s;
 		};
