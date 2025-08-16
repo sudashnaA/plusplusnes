@@ -623,64 +623,49 @@ uint8_t CPU6502::INC()
 
 uint8_t CPU6502::ASL()
 {
-	/*fetch();
-	m_temp = (uint16_t)m_fetched << 1;
-	setFlag(C, (m_temp & 0xFF00) > 0);
-	setFlag(Z, (m_temp & 0x00FF) == 0x00);
-	setFlag(N, m_temp & 0x80);
-	if (m_lookup[m_opcode].addrmode == &CPU6502::IMP)
-		m_a = m_temp & 0x00FF;
-	else
-		write(m_addrAbs, m_temp & 0x00FF);*/
-
 	shift(
+		// shift the fetched byte to the left
 		[=](){ m_temp = static_cast<uint16_t>(m_fetched << 1); },
+
 		[=](){ setFlag(C, (m_temp & 0xFF00) > 0); }
 	);
-
 
 	return 0;
 }
 
 uint8_t CPU6502::LSR()
 {
-	fetch();
-	m_temp = m_fetched >> 1;
-	setFlag(C, m_fetched & 0x0001);
-	setFlag(Z, (m_temp & 0x00FF) == 0x00);
-	setFlag(N, m_temp & 0x0080);
-	if (m_lookup[m_opcode].addrmode == &CPU6502::IMP)
-		m_a = m_temp & 0x00FF;
-	else
-		write(m_addrAbs, m_temp & 0x00FF);
+	shift(
+		// shift the fetched byte the right
+		[=]() { m_temp = static_cast<uint16_t>(m_fetched >> 1); },
+
+		[=]() { setFlag(C, m_fetched & 0x0001); }
+	);
+
 	return 0;
 }
 
 uint8_t CPU6502::ROL()
 {
-	fetch();
-	m_temp = (uint16_t)(m_fetched << 1) | getFlag(C);
-	setFlag(C, m_temp & 0xFF00);
-	setFlag(Z, (m_temp & 0x00FF) == 0x00);
-	setFlag(N, m_temp & 0x0080);
-	if (m_lookup[m_opcode].addrmode == &CPU6502::IMP)
-		m_a = m_temp & 0x00FF;
-	else
-		write(m_addrAbs, m_temp & 0x00FF);
+	shift(
+		// shift the fetched byte the left by one and OR with the value of the C flag
+		[=]() { m_temp = static_cast<uint16_t>(m_fetched << 1) | getFlag(C); },
+
+		[=]() { setFlag(C, m_temp & 0xFF00); }
+	);
+
 	return 0;
 }
 
 uint8_t CPU6502::ROR()
 {
-	fetch();
-	m_temp = (uint16_t)(getFlag(C) << 7) | (m_fetched >> 1);
-	setFlag(C, m_fetched & 0x01);
-	setFlag(Z, (m_temp & 0x00FF) == 0x00);
-	setFlag(N, m_temp & 0x0080);
-	if (m_lookup[m_opcode].addrmode == &CPU6502::IMP)
-		m_a = m_temp & 0x00FF;
-	else
-		write(m_addrAbs, m_temp & 0x00FF);
+	shift(
+		// set the value of the carry flag to be MSB, 
+		[=]() { m_temp = static_cast<uint16_t>(getFlag(C) << 7) | (m_fetched >> 1); },
+
+		[=]() { setFlag(C, m_fetched & 0x01); }
+	);
+
 	return 0;
 }
 

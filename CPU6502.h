@@ -76,13 +76,19 @@ private:
 	void incrementRegister(uint8_t& var);
 	void decrementRegister(uint8_t& var);
 
+	// Function will fetch a byte from memory
+	// The shiftFn is used to peform the shift operation e.g. Arithmetic shift left
+	// the cflagFn will set the appropriate C flag
 	template <typename T, typename S>
 	void shift(const T& shiftFn, const S& cflagFn) {
 		fetch();
+
 		shiftFn();
 		cflagFn();
+
 		setZifZero(m_temp & 0x00FF);
 		setNifMsbSet(m_temp & 0x80);
+
 		if (m_lookup[m_opcode].addrmode == &CPU6502::IMP) {
 			m_a = m_temp & 0x00FF;
 		}
