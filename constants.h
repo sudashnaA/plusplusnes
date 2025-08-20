@@ -2,6 +2,7 @@
 
 inline constexpr uint8_t STKP_INITIAL_VALUE{ 0xFD };
 inline constexpr uint16_t ADDR_ABS_INITIAL_VALUE{ 0xFFFC };
+inline constexpr double PI = 3.14159;
 
 enum BitShift {
     zero_bits,

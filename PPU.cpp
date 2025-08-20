@@ -93,7 +93,6 @@ olc::Sprite& PPU::GetScreen()
 }
 
 
-
 olc::Sprite& PPU::GetPatternTable(uint8_t i, uint8_t palette)
 {
 	for (uint16_t nTileY = 0; nTileY < 16; nTileY++)

@@ -12,27 +12,34 @@ public:
 	PPU();
 	~PPU();
 
+	olc::Sprite& GetScreen();
+	olc::Sprite& GetNameTable(uint8_t i);
+	olc::Sprite& GetPatternTable(uint8_t i, uint8_t palette);
+	olc::Pixel& GetColorFromPaletteRam(uint8_t palette, uint8_t pixel);
+
+	bool frameComplete = false;
+
+	uint8_t* pointerOAM = (uint8_t*)OAM;
+
+	uint8_t cpuRead(uint16_t addr, bool rdonly = false);
+	void    cpuWrite(uint16_t addr, uint8_t  data);
+	uint8_t ppuRead(uint16_t addr, bool rdonly = false);
+	void    ppuWrite(uint16_t addr, uint8_t data);
+
+	void connectCartridge(const std::shared_ptr<Cartridge>& cartridge);
+	void clock();
+	void reset();
+	bool nmi = false;
+
 private:
 	uint8_t     tblName[2][1024];
 	uint8_t     tblPattern[2][4096];
 	uint8_t		tblPalette[32];
 
-private:
 	olc::Pixel  palScreen[0x40];
 	olc::Sprite* sprScreen;
 	olc::Sprite* sprNameTable[2];
 	olc::Sprite* sprPatternTable[2];
-
-public:
-	olc::Sprite& GetScreen();
-	olc::Sprite& GetNameTable(uint8_t i);
-	olc::Sprite& GetPatternTable(uint8_t i, uint8_t palette);
-
-	olc::Pixel& GetColorFromPaletteRam(uint8_t palette, uint8_t pixel);
-
-	bool frameComplete = false;
-
-private:
 
 	union
 	{
@@ -123,6 +130,7 @@ private:
 	} OAM[64];
 	uint8_t oam_addr = 0x00;
 
+	std::shared_ptr<Cartridge> cart;
 
 	sObjectAttributeEntry spriteScanline[8];
 	uint8_t sprite_count;
@@ -130,22 +138,4 @@ private:
 	uint8_t sprite_shifter_pattern_hi[8];
 	bool bSpriteZeroHitPossible = false;
 	bool bSpriteZeroBeingRendered = false;
-public:
-	uint8_t* pointerOAM = (uint8_t*)OAM;
-
-
-public:
-	uint8_t cpuRead(uint16_t addr, bool rdonly = false);
-	void    cpuWrite(uint16_t addr, uint8_t  data);
-	uint8_t ppuRead(uint16_t addr, bool rdonly = false);
-	void    ppuWrite(uint16_t addr, uint8_t data);
-
-private:
-		std::shared_ptr<Cartridge> cart;
-
-public:
-	void connectCartridge(const std::shared_ptr<Cartridge>& cartridge);
-	void clock();
-	void reset();
-	bool nmi = false;
 };
