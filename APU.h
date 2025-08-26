@@ -87,9 +87,12 @@ public:
 	double getOutputSample();
 
 private:
-	uint32_t frameClockCounter = 0;
-	uint32_t clockCounter = 0;
-	bool useRawMode = false;
+	uint32_t frameClockCounter{ 0 };
+	uint32_t clockCounter{ 0 };
+	bool useRawMode{ false };
 	static uint8_t lengthTable[];
+
+	bool pulse1Enable{ false };
+	double pulse1Sample{ 0.0 };
 	
 };

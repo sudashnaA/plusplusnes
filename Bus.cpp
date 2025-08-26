@@ -24,6 +24,9 @@ void Bus::cpuWrite(uint16_t addr, uint8_t data) {
 	else if (addr >= 0x2000 && addr <= 0x3FFF) {
 		ppu.cpuWrite(addr & 0x0007, data);
 	}
+	else if ((addr >= 0x4000 && addr <= 0x4013) || addr == 0x4015 || addr == 0x4017) {
+		apu.cpuWrite(addr, data);
+	}
 	else if (addr == 0x4014) {
 		m_dmaPage = data;
 		m_dmaAddr = 0x00;
@@ -73,8 +76,9 @@ void Bus::reset() {
 	m_dmaTransfer = false;
 }
 
-void Bus::clock() {
+bool Bus::clock() {
 	ppu.clock();
+	apu.clock();
 
 	// CPU runs 3x slower than ppu;
 	if (m_systemClockCounter % 3 == 0) {
@@ -107,6 +111,15 @@ void Bus::clock() {
 		}
 	}
 
+	bool audioSampleReady{ false };
+	audioTime += audioTimePerNESClock;
+
+	if (audioTime >= audioTimePerSystemSample) {
+		audioTime -= audioTimePerSystemSample;
+		audioSample = apu.getOutputSample();
+		audioSampleReady = true;
+	}
+
 	if (ppu.nmi)
 	{
 		ppu.nmi = false;
@@ -114,4 +127,12 @@ void Bus::clock() {
 	}
 
 	++m_systemClockCounter;
+
+	return audioSampleReady;
+}
+
+void Bus::setSampleFrequency(uint32_t sampleRate)
+{
+	audioTimePerSystemSample = 1.0 / static_cast<double>(sampleRate);
+	audioTimePerNESClock = 1.0 / PPU_CLOCK_FREQ;
 }
