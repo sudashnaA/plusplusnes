@@ -27,3 +27,11 @@ enum BitShift {
     sixteen_bits,
     max_bits,
 };
+
+// APU constants
+enum APU_SEQUENCE_MODES {
+    SEQUENCE_ONE = 3729,
+    SEQUENCE_TWO = 7457,
+    SEQUENCE_THREE = 11186,
+    SEQUENCE_FOUR = 14916,
+};

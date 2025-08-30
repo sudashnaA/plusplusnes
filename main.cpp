@@ -129,6 +129,7 @@ private:
 
 	static float SoundOut(int channel, float globalTime, float timeStep)
 	{
+		// Clock until there is a sample ready
 		while (!pInstance->nes.clock()) {};
 		return static_cast<float>(pInstance->nes.audioSample);
 	}
