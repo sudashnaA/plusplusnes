@@ -112,10 +112,10 @@ bool Bus::clock() {
 	}
 
 	bool audioSampleReady{ false };
-	audioTime += audioTimePerNESClock;
+	m_audioTime += m_audioTimePerNESClock;
 
-	if (audioTime >= audioTimePerSystemSample) {
-		audioTime -= audioTimePerSystemSample;
+	if (m_audioTime >= m_audioTimePerSystemSample) {
+		m_audioTime -= m_audioTimePerSystemSample;
 		audioSample = apu.getOutputSample();
 		audioSampleReady = true;
 	}
@@ -133,6 +133,6 @@ bool Bus::clock() {
 
 void Bus::setSampleFrequency(uint32_t sampleRate)
 {
-	audioTimePerSystemSample = 1.0 / static_cast<double>(sampleRate);
-	audioTimePerNESClock = 1.0 / PPU_CLOCK_FREQ;
+	m_audioTimePerSystemSample = 1.0 / static_cast<double>(sampleRate);
+	m_audioTimePerNESClock = 1.0 / PPU_CLOCK_FREQ;
 }

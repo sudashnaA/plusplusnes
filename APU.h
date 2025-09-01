@@ -5,6 +5,7 @@
 #include <array>
 
 namespace {
+
 	struct Envelope
 	{
 		void clock(bool bLoop)
@@ -95,7 +96,7 @@ namespace {
 	struct Pulse
 	{
 		double frequency{ 0 };
-		double dutycycle{ 0 };
+		double dutyCycle{ 0 };
 		double amplitude{ 1 };
 		double harmonics{ 20 };
 
@@ -103,7 +104,7 @@ namespace {
 		{
 			double a{ 0 };
 			double b{ 0 };
-			double p{ dutycycle * 2.0 * PI };
+			double p{ dutyCycle * 2.0 * PI };
 
 			auto approxSin = [](double t)
 				{
@@ -218,7 +219,7 @@ private:
 	bool m_pulse1Enable{ false };
 	bool m_pulse1Halt{ false };
 	double m_pulse1Sample{ 0.0 };
-	double m_pulse1output{ 0.0 };
+	double m_pulse1Output{ 0.0 };
 
 	// Square wave pulse channel 2
 	Sequencer m_pulse2Sequencer{};
@@ -229,7 +230,7 @@ private:
 	bool m_pulse2Enable{ false };
 	bool m_pulse2Halt{ false };
 	double m_pulse2Sample{ 0.0 };
-	double m_pulse2output{ 0.0 };
+	double m_pulse2Output{ 0.0 };
 
 	// Noise channel
 	bool m_noiseEnable{ false };

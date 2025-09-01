@@ -34,9 +34,10 @@ private:
 	uint32_t m_systemClockCounter{ 0 };
 	std::array<uint8_t, 2> m_controllerState{};
 
-	double audioTimePerSystemSample{ 0.0 };
-	double audioTimePerNESClock{ 0.0 };
-	double audioTime{ 0 };
+	double m_audioTimePerSystemSample{ 0.0 };
+	double m_audioTimePerNESClock{ 0.0 };
+	double m_audioTime{ 0.0 };
+	double m_audioGlobalTime{ 0.0 };
 
 	uint8_t m_dmaPage{ 0x00 };
 	uint8_t m_dmaAddr{ 0x00 };
