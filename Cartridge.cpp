@@ -91,7 +91,7 @@ bool Cartridge::imageValid() {
 bool Cartridge::cpuRead(uint16_t addr, uint8_t& data)
 {
 	uint32_t mappedAddr{ 0 };
-	if (m_ptrMapper->cpuMapRead(addr, mappedAddr)) {
+	if (m_ptrMapper->cpuMapRead(addr, mappedAddr, data)) {
 		data = m_prgMemory[mappedAddr];
 		return true;
 	}
