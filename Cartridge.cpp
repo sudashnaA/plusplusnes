@@ -92,6 +92,11 @@ bool Cartridge::cpuRead(uint16_t addr, uint8_t& data)
 {
 	uint32_t mappedAddr{ 0 };
 	if (m_ptrMapper->cpuMapRead(addr, mappedAddr, data)) {
+
+		if (mappedAddr == 0xFFFFFFFF) {
+			return true;
+		}
+
 		data = m_prgMemory[mappedAddr];
 		return true;
 	}
@@ -103,6 +108,10 @@ bool Cartridge::cpuWrite(uint16_t addr, uint8_t data)
 {
 	uint32_t mappedAddr{ 0 };
 	if (m_ptrMapper->cpuMapWrite(addr, mappedAddr, data)) {
+		if (mappedAddr == 0xFFFFFFFF) {
+			return true;
+		}
+
 		m_prgMemory[mappedAddr] = data;
 		return true;
 	}
