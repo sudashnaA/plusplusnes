@@ -1,5 +1,7 @@
 #pragma once
+#include "constants.h"
 #include <cstdint>
+
 class Mapper
 {
 public:
@@ -12,6 +14,8 @@ public:
 	virtual bool ppuMapWrite(uint16_t addr, uint32_t& mappedAddr) = 0;
 
 	virtual void reset() = 0;
+
+	virtual MIRROR mirror();
 
 protected:
 	uint8_t m_prgBanks{ 0 };

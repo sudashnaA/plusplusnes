@@ -1,6 +1,7 @@
 #pragma once
 #include "Mapper.h"
 #include "Mapper000.h"
+#include "constants.h"
 #include <memory>
 #include <cstdint>
 #include <vector>
@@ -9,13 +10,7 @@
 class Cartridge
 {
 public:
-	enum MIRROR
-	{
-		HORIZONTAL,
-		VERTICAL,
-		ONESCREEN_LO,
-		ONESCREEN_HI,
-	} mirror = HORIZONTAL;
+	MIRROR mirror = MIRROR::HORIZONTAL;
 
 	Cartridge(const std::string& filePath);
 

@@ -35,3 +35,13 @@ enum APU_SEQUENCE_MODES {
     SEQUENCE_THREE = 11186,
     SEQUENCE_FOUR = 14916,
 };
+
+// Enum for mirroring modes
+enum class MIRROR
+{
+    HARDWARE,
+    HORIZONTAL,
+    VERTICAL,
+    ONESCREEN_LO,
+    ONESCREEN_HI,
+};

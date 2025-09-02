@@ -1,9 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <memory>
-
 #include "olcPixelGameEngine.h"
-
 #include "Cartridge.h"
 
 class PPU

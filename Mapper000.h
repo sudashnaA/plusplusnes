@@ -12,6 +12,7 @@ public:
 	bool ppuMapRead(uint16_t addr, uint32_t& mappedAddr) override;
 	bool ppuMapWrite(uint16_t addr, uint32_t& mappedAddr) override;
 	void reset() override;
+
 private:
 };
 

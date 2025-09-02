@@ -15,3 +15,8 @@ void Mapper::reset()
 {
 
 }
+
+MIRROR Mapper::mirror()
+{
+	return MIRROR::HARDWARE;
+}

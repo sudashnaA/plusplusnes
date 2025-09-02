@@ -31,7 +31,7 @@ Cartridge::Cartridge(const std::string& filePath) {
 		}
 
 		m_mapperID = ((header.mapper2 >> 4) << 4) | (header.mapper1 >> 4);
-		mirror = (header.mapper1 & 0x01) ? VERTICAL : HORIZONTAL;
+		mirror = (header.mapper1 & 0x01) ? MIRROR::VERTICAL : MIRROR::HORIZONTAL;
 
 		uint8_t fileType{ 1 };
 
