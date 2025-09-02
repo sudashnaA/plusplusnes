@@ -263,7 +263,7 @@ uint8_t PPU::ppuRead(uint16_t addr, bool rdonly)
 	{
 		addr &= 0x0FFF;
 
-		if (cart->mirror == MIRROR::VERTICAL)
+		if (cart->mirror() == MIRROR::VERTICAL)
 		{
 			if (addr >= 0x0000 && addr <= 0x03FF)
 				data = tblName[0][addr & 0x03FF];
@@ -274,7 +274,7 @@ uint8_t PPU::ppuRead(uint16_t addr, bool rdonly)
 			if (addr >= 0x0C00 && addr <= 0x0FFF)
 				data = tblName[1][addr & 0x03FF];
 		}
-		else if (cart->mirror == MIRROR::HORIZONTAL)
+		else if (cart->mirror() == MIRROR::HORIZONTAL)
 		{
 			if (addr >= 0x0000 && addr <= 0x03FF)
 				data = tblName[0][addr & 0x03FF];
@@ -314,7 +314,7 @@ void PPU::ppuWrite(uint16_t addr, uint8_t data)
 	else if (addr >= 0x2000 && addr <= 0x3EFF)
 	{
 		addr &= 0x0FFF;
-		if (cart->mirror == MIRROR::VERTICAL)
+		if (cart->mirror() == MIRROR::VERTICAL)
 		{
 			if (addr >= 0x0000 && addr <= 0x03FF)
 				tblName[0][addr & 0x03FF] = data;
@@ -325,7 +325,7 @@ void PPU::ppuWrite(uint16_t addr, uint8_t data)
 			if (addr >= 0x0C00 && addr <= 0x0FFF)
 				tblName[1][addr & 0x03FF] = data;
 		}
-		else if (cart->mirror == MIRROR::HORIZONTAL)
+		else if (cart->mirror() == MIRROR::HORIZONTAL)
 		{
 			if (addr >= 0x0000 && addr <= 0x03FF)
 				tblName[0][addr & 0x03FF] = data;

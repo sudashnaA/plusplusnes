@@ -10,8 +10,6 @@
 class Cartridge
 {
 public:
-	MIRROR mirror = MIRROR::HORIZONTAL;
-
 	Cartridge(const std::string& filePath);
 
 	// for Main bus
@@ -24,8 +22,11 @@ public:
 	bool	imageValid();
 	void	reset();
 
+	MIRROR mirror();
+	std::shared_ptr<Mapper> getMapper();
 
 private:
+	MIRROR m_hardwareMirror = MIRROR::HORIZONTAL;
 	bool m_imageValid{ false };
 
 	std::vector<uint8_t> m_prgMemory{};

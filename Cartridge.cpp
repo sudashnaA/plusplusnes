@@ -31,7 +31,7 @@ Cartridge::Cartridge(const std::string& filePath) {
 		}
 
 		m_mapperID = ((header.mapper2 >> 4) << 4) | (header.mapper1 >> 4);
-		mirror = (header.mapper1 & 0x01) ? MIRROR::VERTICAL : MIRROR::HORIZONTAL;
+		m_hardwareMirror = (header.mapper1 & 0x01) ? MIRROR::VERTICAL : MIRROR::HORIZONTAL;
 
 		uint8_t fileType{ 1 };
 
@@ -55,13 +55,23 @@ Cartridge::Cartridge(const std::string& filePath) {
 			ifs.read((char*)m_chrMemory.data(), m_chrMemory.size());
 		}
 		if (fileType == 2) {
-		
+			m_prgBanks = (header.prgRamSize & 0x07) << 8 | header.prgByte;
+			m_prgMemory.resize(m_prgBanks * 16384);
+			ifs.read(reinterpret_cast<char*>(m_prgMemory.data()), m_prgMemory.size());
+
+			m_chrBanks = (header.prgRamSize & 0x38) << 8 | header.chrByte;
+			m_chrMemory.resize(m_chrBanks * 8192);
+			ifs.read(reinterpret_cast<char*>(m_chrMemory.data()), m_chrMemory.size());
 		}
 
 		switch (m_mapperID) {
-		case 0:
-			m_ptrMapper = std::make_shared<Mapper000>(m_prgBanks, m_chrBanks);
-			break;
+			case   0: m_ptrMapper = std::make_shared<Mapper000>(m_prgBanks, m_chrBanks); break;
+		/*	case   1: m_ptrMapper = std::make_shared<Mapper001>(m_prgBanks, m_chrBanks); break;
+			case   2: m_ptrMapper = std::make_shared<Mapper002>(m_prgBanks, m_chrBanks); break;
+			case   3: m_ptrMapper = std::make_shared<Mapper003>(m_prgBanks, m_chrBanks); break;
+			case   4: m_ptrMapper = std::make_shared<Mapper004>(m_prgBanks, m_chrBanks); break;
+			case  66: m_ptrMapper = std::make_shared<Mapper066>(m_prgBanks, m_chrBanks); break;*/
+
 		}
 
 		m_imageValid = true;
@@ -85,6 +95,7 @@ bool Cartridge::cpuRead(uint16_t addr, uint8_t& data)
 		data = m_prgMemory[mappedAddr];
 		return true;
 	}
+
 	return false;
 }
 
@@ -125,4 +136,21 @@ void Cartridge::reset()
 	{
 		m_ptrMapper->reset();
 	}
+}
+
+MIRROR Cartridge::mirror()
+{
+	MIRROR m = m_ptrMapper->mirror();
+
+	if (m == MIRROR::HARDWARE) 
+	{ 
+		return m_hardwareMirror; 
+	}
+
+	return m;
+}
+
+std::shared_ptr<Mapper> Cartridge::getMapper()
+{
+	return m_ptrMapper;
 }
