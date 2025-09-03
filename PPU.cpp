@@ -373,6 +373,8 @@ void PPU::reset()
 	control.reg = 0x00;
 	vram_addr.reg = 0x0000;
 	tram_addr.reg = 0x0000;
+	m_scanlineTrigger = false;
+	m_oddFrame = false;
 }
 
 void PPU::clock()
@@ -419,6 +421,7 @@ void PPU::clock()
 				}
 			}
 		};
+
 	auto TransferAddressX = [&]()
 		{
 			if (mask.render_background || mask.render_sprites)
@@ -427,6 +430,7 @@ void PPU::clock()
 				vram_addr.coarse_x = tram_addr.coarse_x;
 			}
 		};
+
 	auto TransferAddressY = [&]()
 		{
 			if (mask.render_background || mask.render_sprites)
@@ -436,6 +440,7 @@ void PPU::clock()
 				vram_addr.coarse_y = tram_addr.coarse_y;
 			}
 		};
+
 	auto LoadBackgroundShifters = [&]()
 		{
 			bg_shifter_pattern_lo = (bg_shifter_pattern_lo & 0xFF00) | bg_next_tile_lsb;
@@ -443,6 +448,7 @@ void PPU::clock()
 			bg_shifter_attrib_lo = (bg_shifter_attrib_lo & 0xFF00) | ((bg_next_tile_attrib & 0b01) ? 0xFF : 0x00);
 			bg_shifter_attrib_hi = (bg_shifter_attrib_hi & 0xFF00) | ((bg_next_tile_attrib & 0b10) ? 0xFF : 0x00);
 		};
+
 	auto UpdateShifters = [&]()
 		{
 			if (mask.render_background)
@@ -469,10 +475,11 @@ void PPU::clock()
 				}
 			}
 		};
+
 	if (scanline >= -1 && scanline < 240)
 	{
 
-		if (scanline == 0 && cycle == 0)
+		if (scanline == 0 and cycle == 0 and m_oddFrame and (mask.render_background || mask.render_sprites))
 		{
 			cycle = 1;
 		}
@@ -676,6 +683,7 @@ void PPU::clock()
 				nmi = true;
 		}
 	}
+
 	uint8_t bg_pixel = 0x00;
 	uint8_t bg_palette = 0x00;
 	if (mask.render_background)
@@ -690,7 +698,8 @@ void PPU::clock()
 	}
 	uint8_t fg_pixel = 0x00;
 	uint8_t fg_palette = 0x00;
-	uint8_t fg_priority = 0x00;// A bit of the sprite attribute indicates if its
+	uint8_t fg_priority = 0x00;
+
 	if (mask.render_sprites)
 	{
 
