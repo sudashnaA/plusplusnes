@@ -1,5 +1,8 @@
 #include "Cartridge.h"
 #include "Mapper.h"
+#include "Mapper000.h"
+#include "Mapper002.h"
+#include "Mapper003.h"
 #include <string>
 #include <memory>
 #include <array>
@@ -66,10 +69,10 @@ Cartridge::Cartridge(const std::string& filePath) {
 
 		switch (m_mapperID) {
 			case   0: m_ptrMapper = std::make_shared<Mapper000>(m_prgBanks, m_chrBanks); break;
-		/*	case   1: m_ptrMapper = std::make_shared<Mapper001>(m_prgBanks, m_chrBanks); break;
+			//case   1: m_ptrMapper = std::make_shared<Mapper001>(m_prgBanks, m_chrBanks); break;
 			case   2: m_ptrMapper = std::make_shared<Mapper002>(m_prgBanks, m_chrBanks); break;
 			case   3: m_ptrMapper = std::make_shared<Mapper003>(m_prgBanks, m_chrBanks); break;
-			case   4: m_ptrMapper = std::make_shared<Mapper004>(m_prgBanks, m_chrBanks); break;
+			/*case   4: m_ptrMapper = std::make_shared<Mapper004>(m_prgBanks, m_chrBanks); break;
 			case  66: m_ptrMapper = std::make_shared<Mapper066>(m_prgBanks, m_chrBanks); break;*/
 
 		}
