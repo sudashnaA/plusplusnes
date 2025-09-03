@@ -14,7 +14,7 @@ public:
 	void reset() override;
 
 private:
-	uint8_t nPRGBankSelectLow{ 0x00 };
-	uint8_t nPRGBankSelectHigh{ 0x00 };
+	uint8_t m_nPRGBankSelectLow{ 0x00 };
+	uint8_t m_nPRGBankSelectHigh{ 0x00 };
 };
 
