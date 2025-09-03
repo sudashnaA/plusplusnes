@@ -246,7 +246,8 @@ void PPU::cpuWrite(uint16_t addr, uint8_t data)
 	}
 }
 
-constexpr std::optional<std::size_t> getTableNameIndex(uint8_t addr, MIRROR mirror)
+// Returns the appropriate index into the table name based on the addr and mirror type
+constexpr std::optional<std::size_t> getTableNameIndex(uint16_t addr, MIRROR mirror)
 {
 	if (mirror != MIRROR::HORIZONTAL and mirror != MIRROR::VERTICAL)
 	{
@@ -290,27 +291,12 @@ uint8_t PPU::ppuRead(uint16_t addr, bool rdonly)
 	{
 		addr &= 0x0FFF;
 
-		if (cart->mirror() == MIRROR::VERTICAL)
+		auto index{ getTableNameIndex(addr, cart->mirror()) };
+		
+		// If the addr is in one of the four pages the index will return a value
+		if (index) 
 		{
-			if (addr >= 0x0000 && addr <= 0x03FF)
-				data = tblName[0][addr & 0x03FF];
-			if (addr >= 0x0400 && addr <= 0x07FF)
-				data = tblName[1][addr & 0x03FF];
-			if (addr >= 0x0800 && addr <= 0x0BFF)
-				data = tblName[0][addr & 0x03FF];
-			if (addr >= 0x0C00 && addr <= 0x0FFF)
-				data = tblName[1][addr & 0x03FF];
-		}
-		else if (cart->mirror() == MIRROR::HORIZONTAL)
-		{
-			if (addr >= 0x0000 && addr <= 0x03FF)
-				data = tblName[0][addr & 0x03FF];
-			if (addr >= 0x0400 && addr <= 0x07FF)
-				data = tblName[0][addr & 0x03FF];
-			if (addr >= 0x0800 && addr <= 0x0BFF)
-				data = tblName[1][addr & 0x03FF];
-			if (addr >= 0x0C00 && addr <= 0x0FFF)
-				data = tblName[1][addr & 0x03FF];
+			data = tblName[*index][addr & 0x03FF];
 		}
 	}
 	else if (addr >= 0x3F00 && addr <= 0x3FFF)
