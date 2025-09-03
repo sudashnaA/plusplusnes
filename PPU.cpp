@@ -246,6 +246,33 @@ void PPU::cpuWrite(uint16_t addr, uint8_t data)
 	}
 }
 
+constexpr std::optional<std::size_t> getTableNameIndex(uint8_t addr, MIRROR mirror)
+{
+	if (mirror != MIRROR::HORIZONTAL and mirror != MIRROR::VERTICAL)
+	{
+		return {};
+	}
+
+	if (addr >= 0x0000 && addr <= 0x03FF)
+	{
+		return 0;
+	}
+	if (addr >= 0x0400 && addr <= 0x07FF)
+	{
+		return (mirror == MIRROR::VERTICAL) ? 1 : 0;
+	}
+	if (addr >= 0x0800 && addr <= 0x0BFF)
+	{
+		return (mirror == MIRROR::VERTICAL) ? 0 : 1;
+	}
+	if (addr >= 0x0C00 && addr <= 0x0FFF)
+	{
+		return 1;
+	}
+
+	return {};
+}
+
 uint8_t PPU::ppuRead(uint16_t addr, bool rdonly)
 {
 	uint8_t data = 0x00;
