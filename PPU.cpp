@@ -302,10 +302,10 @@ uint8_t PPU::ppuRead(uint16_t addr, bool rdonly)
 	else if (addr >= 0x3F00 && addr <= 0x3FFF)
 	{
 		addr &= 0x001F;
-		if (addr == 0x0010) addr = 0x0000;
-		if (addr == 0x0014) addr = 0x0004;
-		if (addr == 0x0018) addr = 0x0008;
-		if (addr == 0x001C) addr = 0x000C;
+		if (addr == 0x0010) { addr = 0x0000;  }
+		if (addr == 0x0014) { addr = 0x0004;  }
+		if (addr == 0x0018) { addr = 0x0008l; }
+		if (addr == 0x001C) { addr = 0x000C;  }
 		data = tblPalette[addr] & (mask.grayscale ? 0x30 : 0x3F);
 	}
 
@@ -327,7 +327,14 @@ void PPU::ppuWrite(uint16_t addr, uint8_t data)
 	else if (addr >= 0x2000 && addr <= 0x3EFF)
 	{
 		addr &= 0x0FFF;
-		if (cart->mirror() == MIRROR::VERTICAL)
+		auto index{ getTableNameIndex(addr, cart->mirror()) };
+
+		// If the addr is in one of the four pages the index will return a value
+		if (index)
+		{
+			tblName[*index][addr & 0x03FF] = data;
+		}
+		/*if (cart->mirror() == MIRROR::VERTICAL)
 		{
 			if (addr >= 0x0000 && addr <= 0x03FF)
 				tblName[0][addr & 0x03FF] = data;
@@ -348,7 +355,7 @@ void PPU::ppuWrite(uint16_t addr, uint8_t data)
 				tblName[1][addr & 0x03FF] = data;
 			if (addr >= 0x0C00 && addr <= 0x0FFF)
 				tblName[1][addr & 0x03FF] = data;
-		}
+		}*/
 	}
 	else if (addr >= 0x3F00 && addr <= 0x3FFF)
 	{
