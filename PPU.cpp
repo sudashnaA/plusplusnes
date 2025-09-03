@@ -770,7 +770,17 @@ void PPU::clock()
 		}
 	}
 	sprScreen->SetPixel(cycle - 1, scanline, GetColorFromPaletteRam(palette, pixel));
+
 	cycle++;
+	if (mask.render_background || mask.render_sprites)
+	{
+		if (cycle == 260 and scanline < 240)
+		{
+			cart->getMapper()->scanline();
+		}
+	}
+
+
 	if (cycle >= 341)
 	{
 		cycle = 0;
@@ -779,6 +789,7 @@ void PPU::clock()
 		{
 			scanline = -1;
 			frameComplete = true;
+			m_oddFrame = !m_oddFrame;
 		}
 	}
 }

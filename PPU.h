@@ -119,6 +119,7 @@ private:
 	uint16_t bg_shifter_pattern_hi = 0x0000;
 	uint16_t bg_shifter_attrib_lo = 0x0000;
 	uint16_t bg_shifter_attrib_hi = 0x0000;
+
 	struct sObjectAttributeEntry
 	{
 		uint8_t y;
@@ -134,6 +135,10 @@ private:
 	uint8_t sprite_count;
 	uint8_t sprite_shifter_pattern_lo[8];
 	uint8_t sprite_shifter_pattern_hi[8];
+
 	bool bSpriteZeroHitPossible = false;
 	bool bSpriteZeroBeingRendered = false;
+
+	bool m_scanlineTrigger{ false };
+	bool m_oddFrame{ false };
 };
