@@ -11,13 +11,13 @@ Mapper002::~Mapper002()
 
 bool Mapper002::cpuMapRead(uint16_t addr, uint32_t& mappedAddr, uint8_t& data)
 {
-	if (addr >= 0x8000 && addr <= 0xBFFF) 
+	if (addr >= 0x8000 and addr <= 0xBFFF) 
 	{
 		mappedAddr = m_nPRGBankSelectLow * 0x4000 + (addr & 0x3FFF);
 		return true;
 	}
 
-	if (addr >= 0xC000 && addr <= 0xFFFF) 
+	if (addr >= 0xC000 and addr <= 0xFFFF) 
 	{
 		mappedAddr = m_nPRGBankSelectHigh * 0x4000 + (addr & 0x3FFF);
 		return true;
@@ -28,7 +28,7 @@ bool Mapper002::cpuMapRead(uint16_t addr, uint32_t& mappedAddr, uint8_t& data)
 
 bool Mapper002::cpuMapWrite(uint16_t addr, uint32_t& mappedAddr, uint8_t data)
 {
-	if (addr >= 0x8000 && addr <= 0xFFFF)
+	if (addr >= 0x8000 and addr <= 0xFFFF)
 	{
 		m_nPRGBankSelectLow = data & 0x0F;
 	}
