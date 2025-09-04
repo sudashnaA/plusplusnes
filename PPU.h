@@ -142,9 +142,11 @@ private:
 	bool m_scanlineTrigger{ false };
 	bool m_oddFrame{ false };
 
+	// Helper functions:
 	constexpr std::optional<std::size_t> getTableNameIndex(uint16_t addr, MIRROR mirror) const;
-
 
 	// precondition: addr >= 0x2000 and addr <= 0x3EFF
 	constexpr uint16_t mirrorTablePaletteAddress(uint16_t addr) const;
+
+	uint8_t ppuReadWrite(uint16_t addr, uint8_t data, bool read);
 };

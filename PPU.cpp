@@ -300,6 +300,60 @@ constexpr uint16_t PPU::mirrorTablePaletteAddress(uint16_t addr) const
 	return addr;
 }
 
+uint8_t PPU::ppuReadWrite(uint16_t addr, uint8_t data, bool read)
+{
+	addr &= 0x3FFF;
+
+	if (cart->ppuRead(addr, data))
+	{
+
+	}
+	else if (addr >= 0x0000 and addr <= 0x1FFF)
+	{
+		if (read) 
+		{
+			data = tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF];
+		}
+		else 
+		{
+			tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF] = data;
+		}
+	}
+	else if (addr >= 0x2000 and addr <= 0x3EFF)
+	{
+		addr &= 0x0FFF;
+
+		auto index{ getTableNameIndex(addr, cart->mirror()) };
+
+		// If the addr is in one of the four pages the index will return a value
+		if (index)
+		{
+			if (read)
+			{
+				data = tblName[*index][addr & 0x03FF];
+			}
+			else
+			{
+				tblName[*index][addr & 0x03FF] = data;
+			}
+		}
+	}
+	else if (addr >= 0x3F00 and addr <= 0x3FFF)
+	{
+		addr = mirrorTablePaletteAddress(addr);
+		if (read)
+		{
+			data = tblPalette[addr] & (mask.grayscale ? 0x30 : 0x3F);
+		}
+		else 
+		{
+			tblPalette[addr] = data;
+		}
+	}
+
+	return data;
+}
+
 // rdonly defaults to false
 uint8_t PPU::ppuRead(uint16_t addr, bool rdonly)
 {
