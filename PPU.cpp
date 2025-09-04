@@ -274,7 +274,8 @@ constexpr std::optional<std::size_t> PPU::getTableNameIndex(uint16_t addr, MIRRO
 	return {};
 }
 
-constexpr std::optional<std::size_t> PPU::mirrorTablePaletteAddress(uint16_t addr) const
+// 
+constexpr uint16_t PPU::mirrorTablePaletteAddress(uint16_t addr) const
 {
 	addr &= 0x001F;
 
@@ -310,11 +311,11 @@ uint8_t PPU::ppuRead(uint16_t addr, bool rdonly)
 	{
 
 	}
-	else if (addr >= 0x0000 && addr <= 0x1FFF)
+	else if (addr >= 0x0000 and addr <= 0x1FFF)
 	{
 		data = tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF];
 	}
-	else if (addr >= 0x2000 && addr <= 0x3EFF)
+	else if (addr >= 0x2000 and addr <= 0x3EFF)
 	{
 		addr &= 0x0FFF;
 
@@ -326,7 +327,7 @@ uint8_t PPU::ppuRead(uint16_t addr, bool rdonly)
 			data = tblName[*index][addr & 0x03FF];
 		}
 	}
-	else if (addr >= 0x3F00 && addr <= 0x3FFF)
+	else if (addr >= 0x3F00 and addr <= 0x3FFF)
 	{
 		addr &= 0x001F;
 		if (addr == 0x0010) { addr = 0x0000;  }
