@@ -334,28 +334,6 @@ void PPU::ppuWrite(uint16_t addr, uint8_t data)
 		{
 			tblName[*index][addr & 0x03FF] = data;
 		}
-		/*if (cart->mirror() == MIRROR::VERTICAL)
-		{
-			if (addr >= 0x0000 && addr <= 0x03FF)
-				tblName[0][addr & 0x03FF] = data;
-			if (addr >= 0x0400 && addr <= 0x07FF)
-				tblName[1][addr & 0x03FF] = data;
-			if (addr >= 0x0800 && addr <= 0x0BFF)
-				tblName[0][addr & 0x03FF] = data;
-			if (addr >= 0x0C00 && addr <= 0x0FFF)
-				tblName[1][addr & 0x03FF] = data;
-		}
-		else if (cart->mirror() == MIRROR::HORIZONTAL)
-		{
-			if (addr >= 0x0000 && addr <= 0x03FF)
-				tblName[0][addr & 0x03FF] = data;
-			if (addr >= 0x0400 && addr <= 0x07FF)
-				tblName[0][addr & 0x03FF] = data;
-			if (addr >= 0x0800 && addr <= 0x0BFF)
-				tblName[1][addr & 0x03FF] = data;
-			if (addr >= 0x0C00 && addr <= 0x0FFF)
-				tblName[1][addr & 0x03FF] = data;
-		}*/
 	}
 	else if (addr >= 0x3F00 && addr <= 0x3FFF)
 	{
