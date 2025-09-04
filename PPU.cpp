@@ -357,66 +357,12 @@ uint8_t PPU::ppuReadWrite(uint16_t addr, uint8_t data, bool read)
 // rdonly defaults to false
 uint8_t PPU::ppuRead(uint16_t addr, bool rdonly)
 {
-	uint8_t data = 0x00;
-	addr &= 0x3FFF;
-
-	if (cart->ppuRead(addr, data))
-	{
-
-	}
-	else if (addr >= 0x0000 and addr <= 0x1FFF)
-	{
-		data = tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF];
-	}
-	else if (addr >= 0x2000 and addr <= 0x3EFF)
-	{
-		addr &= 0x0FFF;
-
-		auto index{ getTableNameIndex(addr, cart->mirror()) };
-		
-		// If the addr is in one of the four pages the index will return a value
-		if (index) 
-		{
-			data = tblName[*index][addr & 0x03FF];
-		}
-	}
-	else if (addr >= 0x3F00 and addr <= 0x3FFF)
-	{
-		addr = mirrorTablePaletteAddress(addr);
-		data = tblPalette[addr] & (mask.grayscale ? 0x30 : 0x3F);
-	}
-
-	return data;
+	return ppuReadWrite(addr, 0x00, true);
 }
 
 void PPU::ppuWrite(uint16_t addr, uint8_t data)
 {
-	addr &= 0x3FFF;
-
-	if (cart->ppuWrite(addr, data))
-	{
-
-	}
-	else if (addr >= 0x0000 && addr <= 0x1FFF)
-	{
-		tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF] = data;
-	}
-	else if (addr >= 0x2000 && addr <= 0x3EFF)
-	{
-		addr &= 0x0FFF;
-		auto index{ getTableNameIndex(addr, cart->mirror()) };
-
-		// If the addr is in one of the four pages the index will return a value
-		if (index)
-		{
-			tblName[*index][addr & 0x03FF] = data;
-		}
-	}
-	else if (addr >= 0x3F00 && addr <= 0x3FFF)
-	{
-		addr = mirrorTablePaletteAddress(addr);
-		tblPalette[addr] = data;
-	}
+	ppuReadWrite(addr, data, false);
 }
 
 void PPU::connectCartridge(const std::shared_ptr<Cartridge>& cartridge)
