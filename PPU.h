@@ -141,4 +141,6 @@ private:
 
 	bool m_scanlineTrigger{ false };
 	bool m_oddFrame{ false };
+
+	constexpr std::optional<std::size_t> getTableNameIndex(uint16_t addr, MIRROR mirror) const;
 };

@@ -247,7 +247,7 @@ void PPU::cpuWrite(uint16_t addr, uint8_t data)
 }
 
 // Returns the appropriate index into the table name based on the addr and mirror type
-constexpr std::optional<std::size_t> getTableNameIndex(uint16_t addr, MIRROR mirror)
+constexpr std::optional<std::size_t> PPU::getTableNameIndex(uint16_t addr, MIRROR mirror) const
 {
 	if (mirror != MIRROR::HORIZONTAL and mirror != MIRROR::VERTICAL)
 	{
@@ -274,6 +274,7 @@ constexpr std::optional<std::size_t> getTableNameIndex(uint16_t addr, MIRROR mir
 	return {};
 }
 
+// rdonly defaults to false
 uint8_t PPU::ppuRead(uint16_t addr, bool rdonly)
 {
 	uint8_t data = 0x00;
