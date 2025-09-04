@@ -274,7 +274,6 @@ constexpr std::optional<std::size_t> PPU::getTableNameIndex(uint16_t addr, MIRRO
 	return {};
 }
 
-// 
 constexpr uint16_t PPU::mirrorTablePaletteAddress(uint16_t addr) const
 {
 	addr &= 0x001F;
@@ -329,11 +328,7 @@ uint8_t PPU::ppuRead(uint16_t addr, bool rdonly)
 	}
 	else if (addr >= 0x3F00 and addr <= 0x3FFF)
 	{
-		addr &= 0x001F;
-		if (addr == 0x0010) { addr = 0x0000;  }
-		if (addr == 0x0014) { addr = 0x0004;  }
-		if (addr == 0x0018) { addr = 0x0008l; }
-		if (addr == 0x001C) { addr = 0x000C;  }
+		addr = mirrorTablePaletteAddress(addr);
 		data = tblPalette[addr] & (mask.grayscale ? 0x30 : 0x3F);
 	}
 
@@ -365,11 +360,7 @@ void PPU::ppuWrite(uint16_t addr, uint8_t data)
 	}
 	else if (addr >= 0x3F00 && addr <= 0x3FFF)
 	{
-		addr &= 0x001F;
-		if (addr == 0x0010) addr = 0x0000;
-		if (addr == 0x0014) addr = 0x0004;
-		if (addr == 0x0018) addr = 0x0008;
-		if (addr == 0x001C) addr = 0x000C;
+		addr = mirrorTablePaletteAddress(addr);
 		tblPalette[addr] = data;
 	}
 }
