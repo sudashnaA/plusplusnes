@@ -143,4 +143,5 @@ private:
 	bool m_oddFrame{ false };
 
 	constexpr std::optional<std::size_t> getTableNameIndex(uint16_t addr, MIRROR mirror) const;
+	constexpr std::optional<std::size_t> mirrorTablePaletteAddress(uint16_t addr) const;
 };

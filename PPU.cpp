@@ -274,6 +274,32 @@ constexpr std::optional<std::size_t> PPU::getTableNameIndex(uint16_t addr, MIRRO
 	return {};
 }
 
+constexpr std::optional<std::size_t> PPU::mirrorTablePaletteAddress(uint16_t addr) const
+{
+	addr &= 0x001F;
+
+	switch (addr)
+	{
+	case 0x0010:
+		addr = 0x0000;
+		break;
+
+	case 0x0014:
+		addr = 0x0004;
+		break;
+
+	case 0x0018:
+		addr = 0x0008l;
+		break;
+
+	case 0x001C:
+		addr = 0x001C;
+		break;
+	}
+
+	return addr;
+}
+
 // rdonly defaults to false
 uint8_t PPU::ppuRead(uint16_t addr, bool rdonly)
 {
