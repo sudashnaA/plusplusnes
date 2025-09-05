@@ -723,6 +723,7 @@ void PPU::clock()
 
 	uint8_t bg_pixel = 0x00;
 	uint8_t bg_palette = 0x00;
+
 	if (mask.render_background)
 	{
 		uint16_t bit_mux = 0x8000 >> fine_x;
