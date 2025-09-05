@@ -413,36 +413,36 @@ constexpr void PPU::incrementScrollX() noexcept
 	}
 }
 
+constexpr void PPU::incrementScrollY() noexcept
+{
+	if (mask.render_background or mask.render_sprites)
+	{
+		if (vram_addr.fine_y < 7)
+		{
+			vram_addr.fine_y++;
+		}
+		else
+		{
+			vram_addr.fine_y = 0;
+			if (vram_addr.coarse_y == 29)
+			{
+				vram_addr.coarse_y = 0;
+				vram_addr.nametable_y = ~vram_addr.nametable_y;
+			}
+			else if (vram_addr.coarse_y == 31)
+			{
+				vram_addr.coarse_y = 0;
+			}
+			else
+			{
+				vram_addr.coarse_y++;
+			}
+		}
+	}
+};
+
 void PPU::clock()
 {	
-	auto IncrementScrollY = [&]()
-		{
-			if (mask.render_background || mask.render_sprites)
-			{
-				if (vram_addr.fine_y < 7)
-				{
-					vram_addr.fine_y++;
-				}
-				else
-				{
-					vram_addr.fine_y = 0;
-					if (vram_addr.coarse_y == 29)
-					{
-						vram_addr.coarse_y = 0;
-						vram_addr.nametable_y = ~vram_addr.nametable_y;
-					}
-					else if (vram_addr.coarse_y == 31)
-					{
-						vram_addr.coarse_y = 0;
-					}
-					else
-					{
-						vram_addr.coarse_y++;
-					}
-				}
-			}
-		};
-
 	auto TransferAddressX = [&]()
 		{
 			if (mask.render_background || mask.render_sprites)
@@ -555,7 +555,7 @@ void PPU::clock()
 		}
 		if (cycle == 256)
 		{
-			IncrementScrollY();
+			incrementScrollY();
 		}
 		if (cycle == 257)
 		{

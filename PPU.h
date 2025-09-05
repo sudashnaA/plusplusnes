@@ -151,4 +151,5 @@ private:
 
 	// clock functions
 	constexpr void incrementScrollX() noexcept;
+	constexpr void incrementScrollY() noexcept;
 };
