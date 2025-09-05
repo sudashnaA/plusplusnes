@@ -153,4 +153,7 @@ private:
 	constexpr void incrementScrollX() noexcept;
 	constexpr void incrementScrollY() noexcept;
 	constexpr void transferAddressX() noexcept;
+	constexpr void transferAddressY() noexcept;
+	constexpr void loadBackgroundShifters() noexcept;
+	constexpr void updateShifters() noexcept;
 };

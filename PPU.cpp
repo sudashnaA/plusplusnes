@@ -450,53 +450,53 @@ constexpr void PPU::transferAddressX() noexcept
 	}
 }
 
+constexpr void PPU::transferAddressY() noexcept
+{
+	if (mask.render_background or mask.render_sprites)
+	{
+		m_vramAddr.fine_y = m_tramAddr.fine_y;
+		m_vramAddr.nametable_y = m_tramAddr.nametable_y;
+		m_vramAddr.coarse_y = m_tramAddr.coarse_y;
+	}
+}
+
+constexpr void PPU::loadBackgroundShifters() noexcept
+{
+	bg_shifter_pattern_lo = (bg_shifter_pattern_lo & 0xFF00) | bg_next_tile_lsb;
+	bg_shifter_pattern_hi = (bg_shifter_pattern_hi & 0xFF00) | bg_next_tile_msb;
+	bg_shifter_attrib_lo = (bg_shifter_attrib_lo & 0xFF00) | ((bg_next_tile_attrib & 0b01) ? 0xFF : 0x00);
+	bg_shifter_attrib_hi = (bg_shifter_attrib_hi & 0xFF00) | ((bg_next_tile_attrib & 0b10) ? 0xFF : 0x00);
+}
+
+constexpr void PPU::updateShifters() noexcept
+{
+	if (mask.render_background)
+	{
+		bg_shifter_pattern_lo <<= 1;
+		bg_shifter_pattern_hi <<= 1;
+		bg_shifter_attrib_lo <<= 1;
+		bg_shifter_attrib_hi <<= 1;
+	}
+
+	if (mask.render_sprites and cycle >= 1 and cycle < 258)
+	{
+		for (int i = 0; i < m_spriteCount; i++)
+		{
+			if (spriteScanline[i].x > 0)
+			{
+				spriteScanline[i].x--;
+			}
+			else
+			{
+				sprite_shifter_pattern_lo[i] <<= 1;
+				sprite_shifter_pattern_hi[i] <<= 1;
+			}
+		}
+	}
+}
+
 void PPU::clock()
 {	
-	auto TransferAddressY = [&]()
-		{
-			if (mask.render_background || mask.render_sprites)
-			{
-				m_vramAddr.fine_y = m_tramAddr.fine_y;
-				m_vramAddr.nametable_y = m_tramAddr.nametable_y;
-				m_vramAddr.coarse_y = m_tramAddr.coarse_y;
-			}
-		};
-
-	auto LoadBackgroundShifters = [&]()
-		{
-			bg_shifter_pattern_lo = (bg_shifter_pattern_lo & 0xFF00) | bg_next_tile_lsb;
-			bg_shifter_pattern_hi = (bg_shifter_pattern_hi & 0xFF00) | bg_next_tile_msb;
-			bg_shifter_attrib_lo = (bg_shifter_attrib_lo & 0xFF00) | ((bg_next_tile_attrib & 0b01) ? 0xFF : 0x00);
-			bg_shifter_attrib_hi = (bg_shifter_attrib_hi & 0xFF00) | ((bg_next_tile_attrib & 0b10) ? 0xFF : 0x00);
-		};
-
-	auto UpdateShifters = [&]()
-		{
-			if (mask.render_background)
-			{
-				bg_shifter_pattern_lo <<= 1;
-				bg_shifter_pattern_hi <<= 1;
-				bg_shifter_attrib_lo <<= 1;
-				bg_shifter_attrib_hi <<= 1;
-			}
-
-			if (mask.render_sprites && cycle >= 1 && cycle < 258)
-			{
-				for (int i = 0; i < m_spriteCount; i++)
-				{
-					if (spriteScanline[i].x > 0)
-					{
-						spriteScanline[i].x--;
-					}
-					else
-					{
-						sprite_shifter_pattern_lo[i] <<= 1;
-						sprite_shifter_pattern_hi[i] <<= 1;
-					}
-				}
-			}
-		};
-
 	if (scanline >= -1 && scanline < 240)
 	{
 
@@ -520,11 +520,11 @@ void PPU::clock()
 
 		if ((cycle >= 2 && cycle < 258) || (cycle >= 321 && cycle < 338))
 		{
-			UpdateShifters();
+			updateShifters();
 			switch ((cycle - 1) % 8)
 			{
 			case 0:
-				LoadBackgroundShifters();
+				loadBackgroundShifters();
 				bg_next_tile_id = ppuRead(0x2000 | (m_vramAddr.reg & 0x0FFF));
 				break;
 			case 2:
@@ -559,7 +559,7 @@ void PPU::clock()
 		}
 		if (cycle == 257)
 		{
-			LoadBackgroundShifters();
+			loadBackgroundShifters();
 			transferAddressX();
 		}
 		if (cycle == 338 || cycle == 340)
@@ -569,7 +569,7 @@ void PPU::clock()
 
 		if (scanline == -1 && cycle >= 280 && cycle < 305)
 		{
-			TransferAddressY();
+			transferAddressY();
 		}
 		if (cycle == 257 && scanline >= 0)
 		{
