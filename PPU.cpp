@@ -508,6 +508,19 @@ constexpr void PPU::preRenderScanline() noexcept
 	}
 }
 
+constexpr void PPU::verticalBlankingLines() noexcept
+{
+	// vblank is set on the second tick of scanline 241
+	if (scanline == 241 && cycle == 1)
+	{
+		status.vertical_blank = 1;
+
+		if (control.enable_nmi) {
+			nmi = true;
+		}
+	}
+}
+
 void PPU::clock()
 {	
 	if (scanline >= -1 && scanline < 240)
@@ -698,18 +711,14 @@ void PPU::clock()
 		}
 	}
 
+	// post render scanline PPU idles
 	if (scanline == 240)
 	{
 	}
 
-	if (scanline >= 241 && scanline < 261)
+	if (scanline >= 241 && scanline <= 260)
 	{
-		if (scanline == 241 && cycle == 1)
-		{
-			status.vertical_blank = 1;
-			if (control.enable_nmi)
-				nmi = true;
-		}
+		verticalBlankingLines();
 	}
 
 	uint8_t bg_pixel = 0x00;
