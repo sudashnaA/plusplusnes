@@ -401,7 +401,7 @@ constexpr void PPU::incrementScrollX() noexcept
 {
 	if (mask.render_background or mask.render_sprites)
 	{
-		if (m_vramAddr.coarse_x == 31)
+		if (m_vramAddr.coarse_x == COARSE_X_LIMIT)
 		{
 			m_vramAddr.coarse_x = 0;
 			m_vramAddr.nametable_x = ~m_vramAddr.nametable_x;
