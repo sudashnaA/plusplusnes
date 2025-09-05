@@ -495,30 +495,37 @@ constexpr void PPU::updateShifters() noexcept
 	}
 }
 
+constexpr void PPU::preRenderScanline() noexcept
+{
+	status.vertical_blank = 0;
+	status.sprite_overflow = 0;
+	status.sprite_zero_hit = 0;
+
+	for (int i = 0; i < 8; i++)
+	{
+		sprite_shifter_pattern_lo[i] = 0;
+		sprite_shifter_pattern_hi[i] = 0;
+	}
+}
+
 void PPU::clock()
 {	
 	if (scanline >= -1 && scanline < 240)
 	{
 
-		if (scanline == 0 and cycle == 0 and m_oddFrame and (mask.render_background || mask.render_sprites))
+		if (scanline == 0 and cycle == 0 and m_oddFrame and (mask.render_background or mask.render_sprites))
 		{
 			cycle = 1;
 		}
 
-		if (scanline == -1 && cycle == 1)
+		// pre render scanline is at -1
+		if (scanline == -1 and cycle == 1)
 		{
-			status.vertical_blank = 0;
-			status.sprite_overflow = 0;
-			status.sprite_zero_hit = 0;
-			for (int i = 0; i < 8; i++)
-			{
-				sprite_shifter_pattern_lo[i] = 0;
-				sprite_shifter_pattern_hi[i] = 0;
-			}
+			preRenderScanline();
 		}
 
 
-		if ((cycle >= 2 && cycle < 258) || (cycle >= 321 && cycle < 338))
+		if ((cycle >= 2 and cycle < 258) or (cycle >= 321 and cycle < 338))
 		{
 			updateShifters();
 			switch ((cycle - 1) % 8)

@@ -156,4 +156,7 @@ private:
 	constexpr void transferAddressY() noexcept;
 	constexpr void loadBackgroundShifters() noexcept;
 	constexpr void updateShifters() noexcept;
+
+	// clock functions (scanline and cycle)
+	constexpr void preRenderScanline() noexcept;
 };

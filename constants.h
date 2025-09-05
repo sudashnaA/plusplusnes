@@ -45,3 +45,6 @@ enum class MIRROR
     ONESCREEN_LO,
     ONESCREEN_HI,
 };
+
+// PPU constants:
+inline constexpr uint16_t COARSE_X_LIMIT{ 31 };
