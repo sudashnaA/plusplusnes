@@ -143,10 +143,12 @@ private:
 	bool m_oddFrame{ false };
 
 	// Helper functions:
-	constexpr std::optional<std::size_t> getTableNameIndex(uint16_t addr, MIRROR mirror) const;
+	constexpr std::optional<std::size_t> getTableNameIndex(uint16_t addr, MIRROR mirror) const noexcept;
 
 	// precondition: addr >= 0x2000 and addr <= 0x3EFF
-	constexpr uint16_t mirrorTablePaletteAddress(uint16_t addr) const;
+	constexpr uint16_t mirrorTablePaletteAddress(uint16_t addr) const noexcept;
+	uint8_t ppuReadWrite(uint16_t addr, uint8_t data, bool read) noexcept;
 
-	uint8_t ppuReadWrite(uint16_t addr, uint8_t data, bool read);
+	// clock functions
+	constexpr void incrementScrollX() noexcept;
 };

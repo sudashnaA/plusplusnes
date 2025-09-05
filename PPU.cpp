@@ -70,6 +70,7 @@ PPU::PPU()
 	palScreen[0x3D] = olc::Pixel(160, 162, 160);
 	palScreen[0x3E] = olc::Pixel(0, 0, 0);
 	palScreen[0x3F] = olc::Pixel(0, 0, 0);
+
 	sprScreen = new olc::Sprite(256, 240);
 	sprNameTable[0] = new olc::Sprite(256, 240);
 	sprNameTable[1] = new olc::Sprite(256, 240);
@@ -247,7 +248,7 @@ void PPU::cpuWrite(uint16_t addr, uint8_t data)
 }
 
 // Returns the appropriate index into the table name based on the addr and mirror type
-constexpr std::optional<std::size_t> PPU::getTableNameIndex(uint16_t addr, MIRROR mirror) const
+constexpr std::optional<std::size_t> PPU::getTableNameIndex(uint16_t addr, MIRROR mirror) const noexcept
 {
 	if (mirror != MIRROR::HORIZONTAL and mirror != MIRROR::VERTICAL)
 	{
@@ -274,7 +275,7 @@ constexpr std::optional<std::size_t> PPU::getTableNameIndex(uint16_t addr, MIRRO
 	return {};
 }
 
-constexpr uint16_t PPU::mirrorTablePaletteAddress(uint16_t addr) const
+constexpr uint16_t PPU::mirrorTablePaletteAddress(uint16_t addr) const noexcept
 {
 	addr &= 0x001F;
 
@@ -300,7 +301,7 @@ constexpr uint16_t PPU::mirrorTablePaletteAddress(uint16_t addr) const
 	return addr;
 }
 
-uint8_t PPU::ppuReadWrite(uint16_t addr, uint8_t data, bool read)
+uint8_t PPU::ppuReadWrite(uint16_t addr, uint8_t data, bool read) noexcept
 {
 	addr &= 0x3FFF;
 
@@ -357,11 +358,13 @@ uint8_t PPU::ppuReadWrite(uint16_t addr, uint8_t data, bool read)
 // rdonly defaults to false
 uint8_t PPU::ppuRead(uint16_t addr, bool rdonly)
 {
+	// true argument as we are reading
 	return ppuReadWrite(addr, 0x00, true);
 }
 
 void PPU::ppuWrite(uint16_t addr, uint8_t data)
 {
+	// false argument as we are writing
 	ppuReadWrite(addr, data, false);
 }
 
@@ -394,23 +397,24 @@ void PPU::reset()
 	m_oddFrame = false;
 }
 
-void PPU::clock()
+constexpr void PPU::incrementScrollX() noexcept
 {
-	auto IncrementScrollX = [&]()
+	if (mask.render_background or mask.render_sprites)
+	{
+		if (vram_addr.coarse_x == 31)
 		{
-			if (mask.render_background || mask.render_sprites)
-			{
-				if (vram_addr.coarse_x == 31)
-				{
-					vram_addr.coarse_x = 0;
-					vram_addr.nametable_x = ~vram_addr.nametable_x;
-				}
-				else
-				{
-					vram_addr.coarse_x++;
-				}
-			}
-		};
+			vram_addr.coarse_x = 0;
+			vram_addr.nametable_x = ~vram_addr.nametable_x;
+		}
+		else
+		{
+			vram_addr.coarse_x++;
+		}
+	}
+}
+
+void PPU::clock()
+{	
 	auto IncrementScrollY = [&]()
 		{
 			if (mask.render_background || mask.render_sprites)
@@ -545,7 +549,7 @@ void PPU::clock()
 					+ (vram_addr.fine_y) + 8);
 				break;
 			case 7:
-				IncrementScrollX();
+				incrementScrollX();
 				break;
 			}
 		}
