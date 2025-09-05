@@ -104,8 +104,8 @@ private:
 	};
 
 
-	loopy_register vram_addr;
-	loopy_register tram_addr;
+	loopy_register m_vramAddr;
+	loopy_register m_tramAddr;
 	uint8_t fine_x = 0x00;
 	uint8_t address_latch = 0x00;
 	uint8_t ppu_data_buffer = 0x00;
@@ -132,7 +132,7 @@ private:
 	std::shared_ptr<Cartridge> cart;
 
 	sObjectAttributeEntry spriteScanline[8];
-	uint8_t sprite_count;
+	uint8_t m_spriteCount;
 	uint8_t sprite_shifter_pattern_lo[8];
 	uint8_t sprite_shifter_pattern_hi[8];
 
@@ -152,4 +152,5 @@ private:
 	// clock functions
 	constexpr void incrementScrollX() noexcept;
 	constexpr void incrementScrollY() noexcept;
+	constexpr void transferAddressX() noexcept;
 };

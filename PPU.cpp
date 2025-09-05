@@ -183,9 +183,9 @@ uint8_t PPU::cpuRead(uint16_t addr, bool rdonly)
 		case 0x0006: break;
 		case 0x0007:
 			data = ppu_data_buffer;
-			ppu_data_buffer = ppuRead(vram_addr.reg);
-			if (vram_addr.reg >= 0x3F00) data = ppu_data_buffer;
-			vram_addr.reg += (control.increment_mode ? 32 : 1);
+			ppu_data_buffer = ppuRead(m_vramAddr.reg);
+			if (m_vramAddr.reg >= 0x3F00) data = ppu_data_buffer;
+			m_vramAddr.reg += (control.increment_mode ? 32 : 1);
 			break;
 		}
 	}
@@ -199,8 +199,8 @@ void PPU::cpuWrite(uint16_t addr, uint8_t data)
 	{
 	case 0x0000:
 		control.reg = data;
-		tram_addr.nametable_x = control.nametable_x;
-		tram_addr.nametable_y = control.nametable_y;
+		m_tramAddr.nametable_x = control.nametable_x;
+		m_tramAddr.nametable_y = control.nametable_y;
 		break;
 	case 0x0001:
 		mask.reg = data;
@@ -217,32 +217,32 @@ void PPU::cpuWrite(uint16_t addr, uint8_t data)
 		if (address_latch == 0)
 		{
 			fine_x = data & 0x07;
-			tram_addr.coarse_x = data >> 3;
+			m_tramAddr.coarse_x = data >> 3;
 			address_latch = 1;
 		}
 		else
 		{
-			tram_addr.fine_y = data & 0x07;
-			tram_addr.coarse_y = data >> 3;
+			m_tramAddr.fine_y = data & 0x07;
+			m_tramAddr.coarse_y = data >> 3;
 			address_latch = 0;
 		}
 		break;
 	case 0x0006:
 		if (address_latch == 0)
 		{
-			tram_addr.reg = (uint16_t)((data & 0x3F) << 8) | (tram_addr.reg & 0x00FF);
+			m_tramAddr.reg = (uint16_t)((data & 0x3F) << 8) | (m_tramAddr.reg & 0x00FF);
 			address_latch = 1;
 		}
 		else
 		{
-			tram_addr.reg = (tram_addr.reg & 0xFF00) | data;
-			vram_addr = tram_addr;
+			m_tramAddr.reg = (m_tramAddr.reg & 0xFF00) | data;
+			m_vramAddr = m_tramAddr;
 			address_latch = 0;
 		}
 		break;
 	case 0x0007:
-		ppuWrite(vram_addr.reg, data);
-		vram_addr.reg += (control.increment_mode ? 32 : 1);
+		ppuWrite(m_vramAddr.reg, data);
+		m_vramAddr.reg += (control.increment_mode ? 32 : 1);
 		break;
 	}
 }
@@ -391,8 +391,8 @@ void PPU::reset()
 	status.reg = 0x00;
 	mask.reg = 0x00;
 	control.reg = 0x00;
-	vram_addr.reg = 0x0000;
-	tram_addr.reg = 0x0000;
+	m_vramAddr.reg = 0x0000;
+	m_tramAddr.reg = 0x0000;
 	m_scanlineTrigger = false;
 	m_oddFrame = false;
 }
@@ -401,14 +401,14 @@ constexpr void PPU::incrementScrollX() noexcept
 {
 	if (mask.render_background or mask.render_sprites)
 	{
-		if (vram_addr.coarse_x == 31)
+		if (m_vramAddr.coarse_x == 31)
 		{
-			vram_addr.coarse_x = 0;
-			vram_addr.nametable_x = ~vram_addr.nametable_x;
+			m_vramAddr.coarse_x = 0;
+			m_vramAddr.nametable_x = ~m_vramAddr.nametable_x;
 		}
 		else
 		{
-			vram_addr.coarse_x++;
+			m_vramAddr.coarse_x++;
 		}
 	}
 }
@@ -417,48 +417,48 @@ constexpr void PPU::incrementScrollY() noexcept
 {
 	if (mask.render_background or mask.render_sprites)
 	{
-		if (vram_addr.fine_y < 7)
+		if (m_vramAddr.fine_y < 7)
 		{
-			vram_addr.fine_y++;
+			m_vramAddr.fine_y++;
 		}
 		else
 		{
-			vram_addr.fine_y = 0;
-			if (vram_addr.coarse_y == 29)
+			m_vramAddr.fine_y = 0;
+			if (m_vramAddr.coarse_y == 29)
 			{
-				vram_addr.coarse_y = 0;
-				vram_addr.nametable_y = ~vram_addr.nametable_y;
+				m_vramAddr.coarse_y = 0;
+				m_vramAddr.nametable_y = ~m_vramAddr.nametable_y;
 			}
-			else if (vram_addr.coarse_y == 31)
+			else if (m_vramAddr.coarse_y == 31)
 			{
-				vram_addr.coarse_y = 0;
+				m_vramAddr.coarse_y = 0;
 			}
 			else
 			{
-				vram_addr.coarse_y++;
+				m_vramAddr.coarse_y++;
 			}
 		}
 	}
-};
+}
+
+constexpr void PPU::transferAddressX() noexcept
+{
+	if (mask.render_background or mask.render_sprites)
+	{
+		m_vramAddr.nametable_x = m_tramAddr.nametable_x;
+		m_vramAddr.coarse_x = m_tramAddr.coarse_x;
+	}
+}
 
 void PPU::clock()
 {	
-	auto TransferAddressX = [&]()
-		{
-			if (mask.render_background || mask.render_sprites)
-			{
-				vram_addr.nametable_x = tram_addr.nametable_x;
-				vram_addr.coarse_x = tram_addr.coarse_x;
-			}
-		};
-
 	auto TransferAddressY = [&]()
 		{
 			if (mask.render_background || mask.render_sprites)
 			{
-				vram_addr.fine_y = tram_addr.fine_y;
-				vram_addr.nametable_y = tram_addr.nametable_y;
-				vram_addr.coarse_y = tram_addr.coarse_y;
+				m_vramAddr.fine_y = m_tramAddr.fine_y;
+				m_vramAddr.nametable_y = m_tramAddr.nametable_y;
+				m_vramAddr.coarse_y = m_tramAddr.coarse_y;
 			}
 		};
 
@@ -482,7 +482,7 @@ void PPU::clock()
 
 			if (mask.render_sprites && cycle >= 1 && cycle < 258)
 			{
-				for (int i = 0; i < sprite_count; i++)
+				for (int i = 0; i < m_spriteCount; i++)
 				{
 					if (spriteScanline[i].x > 0)
 					{
@@ -525,28 +525,28 @@ void PPU::clock()
 			{
 			case 0:
 				LoadBackgroundShifters();
-				bg_next_tile_id = ppuRead(0x2000 | (vram_addr.reg & 0x0FFF));
+				bg_next_tile_id = ppuRead(0x2000 | (m_vramAddr.reg & 0x0FFF));
 				break;
 			case 2:
-				bg_next_tile_attrib = ppuRead(0x23C0 | (vram_addr.nametable_y << 11)
-					| (vram_addr.nametable_x << 10)
-					| ((vram_addr.coarse_y >> 2) << 3)
-					| (vram_addr.coarse_x >> 2));
-				if (vram_addr.coarse_y & 0x02) bg_next_tile_attrib >>= 4;
-				if (vram_addr.coarse_x & 0x02) bg_next_tile_attrib >>= 2;
+				bg_next_tile_attrib = ppuRead(0x23C0 | (m_vramAddr.nametable_y << 11)
+					| (m_vramAddr.nametable_x << 10)
+					| ((m_vramAddr.coarse_y >> 2) << 3)
+					| (m_vramAddr.coarse_x >> 2));
+				if (m_vramAddr.coarse_y & 0x02) bg_next_tile_attrib >>= 4;
+				if (m_vramAddr.coarse_x & 0x02) bg_next_tile_attrib >>= 2;
 				bg_next_tile_attrib &= 0x03;
 				break;
 
 			case 4:
 				bg_next_tile_lsb = ppuRead((control.pattern_background << 12)
 					+ ((uint16_t)bg_next_tile_id << 4)
-					+ (vram_addr.fine_y) + 0);
+					+ (m_vramAddr.fine_y) + 0);
 
 				break;
 			case 6:
 				bg_next_tile_msb = ppuRead((control.pattern_background << 12)
 					+ ((uint16_t)bg_next_tile_id << 4)
-					+ (vram_addr.fine_y) + 8);
+					+ (m_vramAddr.fine_y) + 8);
 				break;
 			case 7:
 				incrementScrollX();
@@ -560,11 +560,11 @@ void PPU::clock()
 		if (cycle == 257)
 		{
 			LoadBackgroundShifters();
-			TransferAddressX();
+			transferAddressX();
 		}
 		if (cycle == 338 || cycle == 340)
 		{
-			bg_next_tile_id = ppuRead(0x2000 | (vram_addr.reg & 0x0FFF));
+			bg_next_tile_id = ppuRead(0x2000 | (m_vramAddr.reg & 0x0FFF));
 		}
 
 		if (scanline == -1 && cycle >= 280 && cycle < 305)
@@ -574,7 +574,7 @@ void PPU::clock()
 		if (cycle == 257 && scanline >= 0)
 		{
 			std::memset(spriteScanline, 0xFF, 8 * sizeof(sObjectAttributeEntry));
-			sprite_count = 0;
+			m_spriteCount = 0;
 			for (uint8_t i = 0; i < 8; i++)
 			{
 				sprite_shifter_pattern_lo[i] = 0;
@@ -583,33 +583,33 @@ void PPU::clock()
 			uint8_t nOAMEntry = 0;
 			bSpriteZeroHitPossible = false;
 
-			while (nOAMEntry < 64 && sprite_count < 9)
+			while (nOAMEntry < 64 && m_spriteCount < 9)
 			{
 				int16_t diff = ((int16_t)scanline - (int16_t)OAM[nOAMEntry].y);
 
 				if (diff >= 0 && diff < (control.sprite_size ? 16 : 8))
 				{
-					if (sprite_count < 8)
+					if (m_spriteCount < 8)
 					{
 						if (nOAMEntry == 0)
 						{
 							bSpriteZeroHitPossible = true;
 						}
 
-						memcpy(&spriteScanline[sprite_count], &OAM[nOAMEntry], sizeof(sObjectAttributeEntry));
-						sprite_count++;
+						memcpy(&spriteScanline[m_spriteCount], &OAM[nOAMEntry], sizeof(sObjectAttributeEntry));
+						m_spriteCount++;
 					}
 				}
 
 				nOAMEntry++;
 			}
-			status.sprite_overflow = (sprite_count > 8);
+			status.sprite_overflow = (m_spriteCount > 8);
 		}
 
 		if (cycle == 340)
 		{
 
-			for (uint8_t i = 0; i < sprite_count; i++)
+			for (uint8_t i = 0; i < m_spriteCount; i++)
 			{
 
 				uint8_t sprite_pattern_bits_lo, sprite_pattern_bits_hi;
@@ -726,7 +726,7 @@ void PPU::clock()
 
 		bSpriteZeroBeingRendered = false;
 
-		for (uint8_t i = 0; i < sprite_count; i++)
+		for (uint8_t i = 0; i < m_spriteCount; i++)
 		{
 			if (spriteScanline[i].x == 0)
 			{
