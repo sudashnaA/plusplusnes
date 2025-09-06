@@ -15,6 +15,19 @@ namespace
 	
 	constexpr int TABLE_NAME_SIZE{ 1024 };
 	using TableName = std::array<std::array<uint8_t, TABLE_NAME_SIZE>, TABLE_SLOTS>;
+
+	union StatusRegister
+	{
+		struct
+		{
+			uint8_t unused : 5;
+			uint8_t sprite_overflow : 1;
+			uint8_t sprite_zero_hit : 1;
+			uint8_t vertical_blank : 1;
+		};
+
+		uint8_t reg;
+	};
 }
 
 
@@ -53,7 +66,8 @@ private:
 	olc::Sprite* sprNameTable[2];
 	olc::Sprite* sprPatternTable[2];
 
-	union
+	StatusRegister m_status;
+	/*union
 	{
 		struct
 		{
@@ -64,7 +78,7 @@ private:
 		};
 
 		uint8_t reg;
-	} m_status;
+	} m_status;*/
 
 
 	union
