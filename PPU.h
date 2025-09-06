@@ -44,10 +44,9 @@ public:
 	bool nmi = false;
 
 private:
-	ppu_constants::TableName tblName{};
-	//uint8_t     tblName[2][1024];
-	ppu_constants::TablePattern tblPattern{};
-	std::array<uint8_t, ppu_constants::TABLE_PALETTE_SIZE> tblPalette{};
+	ppu_constants::TableName m_tblName{};
+	ppu_constants::TablePattern m_tblPattern{};
+	std::array<uint8_t, ppu_constants::TABLE_PALETTE_SIZE> m_tblPalette{};
 
 	olc::Pixel  palScreen[0x40];
 	olc::Sprite* sprScreen{};

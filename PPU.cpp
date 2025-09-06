@@ -313,11 +313,11 @@ uint8_t PPU::ppuReadWrite(uint16_t addr, uint8_t data, bool read) noexcept
 	{
 		if (read) 
 		{
-			data = tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF];
+			data = m_tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF];
 		}
 		else 
 		{
-			tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF] = data;
+			m_tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF] = data;
 		}
 	}
 	else if (addr >= 0x2000 and addr <= 0x3EFF)
@@ -331,11 +331,11 @@ uint8_t PPU::ppuReadWrite(uint16_t addr, uint8_t data, bool read) noexcept
 		{
 			if (read)
 			{
-				data = tblName[*index][addr & 0x03FF];
+				data = m_tblName[*index][addr & 0x03FF];
 			}
 			else
 			{
-				tblName[*index][addr & 0x03FF] = data;
+				m_tblName[*index][addr & 0x03FF] = data;
 			}
 		}
 	}
@@ -344,11 +344,11 @@ uint8_t PPU::ppuReadWrite(uint16_t addr, uint8_t data, bool read) noexcept
 		addr = mirrorTablePaletteAddress(addr);
 		if (read)
 		{
-			data = tblPalette[addr] & (mask.grayscale ? 0x30 : 0x3F);
+			data = m_tblPalette[addr] & (mask.grayscale ? 0x30 : 0x3F);
 		}
 		else 
 		{
-			tblPalette[addr] = data;
+			m_tblPalette[addr] = data;
 		}
 	}
 
