@@ -28,6 +28,56 @@ namespace
 
 		uint8_t reg;
 	};
+
+	union MaskRegister
+	{
+		struct
+		{
+			uint8_t grayscale : 1;
+			uint8_t render_background_left : 1;
+			uint8_t render_sprites_left : 1;
+			uint8_t render_background : 1;
+			uint8_t render_sprites : 1;
+			uint8_t enhance_red : 1;
+			uint8_t enhance_green : 1;
+			uint8_t enhance_blue : 1;
+		};
+
+		uint8_t reg;
+	};
+
+	union ControlRegister
+	{
+		struct
+		{
+			uint8_t nametable_x : 1;
+			uint8_t nametable_y : 1;
+			uint8_t increment_mode : 1;
+			uint8_t pattern_sprite : 1;
+			uint8_t pattern_background : 1;
+			uint8_t sprite_size : 1;
+			uint8_t slave_mode : 1;
+			uint8_t enable_nmi : 1;
+		};
+
+		uint8_t reg;
+	};
+
+	union loopyRegister
+	{
+		struct
+		{
+
+			uint16_t coarse_x : 5;
+			uint16_t coarse_y : 5;
+			uint16_t nametable_x : 1;
+			uint16_t nametable_y : 1;
+			uint16_t fine_y : 3;
+			uint16_t unused : 1;
+		};
+
+		uint16_t reg = 0x0000;
+	};
 }
 
 
@@ -67,60 +117,11 @@ private:
 	olc::Sprite* sprPatternTable[2];
 
 	StatusRegister m_status;
+	MaskRegister m_mask;
+	ControlRegister m_control;
 
-	union
-	{
-		struct
-		{
-			uint8_t grayscale : 1;
-			uint8_t render_background_left : 1;
-			uint8_t render_sprites_left : 1;
-			uint8_t render_background : 1;
-			uint8_t render_sprites : 1;
-			uint8_t enhance_red : 1;
-			uint8_t enhance_green : 1;
-			uint8_t enhance_blue : 1;
-		};
-
-		uint8_t reg;
-	} mask;
-
-	union PPUCTRL
-	{
-		struct
-		{
-			uint8_t nametable_x : 1;
-			uint8_t nametable_y : 1;
-			uint8_t increment_mode : 1;
-			uint8_t pattern_sprite : 1;
-			uint8_t pattern_background : 1;
-			uint8_t sprite_size : 1;
-			uint8_t slave_mode : 1;
-			uint8_t enable_nmi : 1;
-		};
-
-		uint8_t reg;
-	} control;
-
-	union loopy_register
-	{
-		struct
-		{
-
-			uint16_t coarse_x : 5;
-			uint16_t coarse_y : 5;
-			uint16_t nametable_x : 1;
-			uint16_t nametable_y : 1;
-			uint16_t fine_y : 3;
-			uint16_t unused : 1;
-		};
-
-		uint16_t reg = 0x0000;
-	};
-
-
-	loopy_register m_vramAddr;
-	loopy_register m_tramAddr;
+	loopyRegister m_vramAddr{};
+	loopyRegister m_tramAddr{};
 	uint8_t fine_x = 0x00;
 	uint8_t address_latch = 0x00;
 	uint8_t ppu_data_buffer = 0x00;

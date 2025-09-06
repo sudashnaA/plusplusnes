@@ -144,10 +144,10 @@ uint8_t PPU::cpuRead(uint16_t addr, bool rdonly)
 		switch (addr)
 		{
 		case 0x0000:
-			data = control.reg;
+			data = m_control.reg;
 			break;
 		case 0x0001:
-			data = mask.reg;
+			data = m_mask.reg;
 			break;
 		case 0x0002:
 			data = m_status.reg;
@@ -185,7 +185,7 @@ uint8_t PPU::cpuRead(uint16_t addr, bool rdonly)
 			data = ppu_data_buffer;
 			ppu_data_buffer = ppuRead(m_vramAddr.reg);
 			if (m_vramAddr.reg >= 0x3F00) data = ppu_data_buffer;
-			m_vramAddr.reg += (control.increment_mode ? 32 : 1);
+			m_vramAddr.reg += (m_control.increment_mode ? 32 : 1);
 			break;
 		}
 	}
@@ -198,12 +198,12 @@ void PPU::cpuWrite(uint16_t addr, uint8_t data)
 	switch (addr)
 	{
 	case 0x0000:
-		control.reg = data;
-		m_tramAddr.nametable_x = control.nametable_x;
-		m_tramAddr.nametable_y = control.nametable_y;
+		m_control.reg = data;
+		m_tramAddr.nametable_x = m_control.nametable_x;
+		m_tramAddr.nametable_y = m_control.nametable_y;
 		break;
 	case 0x0001:
-		mask.reg = data;
+		m_mask.reg = data;
 		break;
 	case 0x0002:
 		break;
@@ -242,7 +242,7 @@ void PPU::cpuWrite(uint16_t addr, uint8_t data)
 		break;
 	case 0x0007:
 		ppuWrite(m_vramAddr.reg, data);
-		m_vramAddr.reg += (control.increment_mode ? 32 : 1);
+		m_vramAddr.reg += (m_control.increment_mode ? 32 : 1);
 		break;
 	}
 }
@@ -344,7 +344,7 @@ uint8_t PPU::ppuReadWrite(uint16_t addr, uint8_t data, bool read) noexcept
 		addr = mirrorTablePaletteAddress(addr);
 		if (read)
 		{
-			data = m_tblPalette[addr] & (mask.grayscale ? 0x30 : 0x3F);
+			data = m_tblPalette[addr] & (m_mask.grayscale ? 0x30 : 0x3F);
 		}
 		else 
 		{
@@ -389,8 +389,8 @@ void PPU::reset()
 	bg_shifter_attrib_lo = 0x0000;
 	bg_shifter_attrib_hi = 0x0000;
 	m_status.reg = 0x00;
-	mask.reg = 0x00;
-	control.reg = 0x00;
+	m_mask.reg = 0x00;
+	m_control.reg = 0x00;
 	m_vramAddr.reg = 0x0000;
 	m_tramAddr.reg = 0x0000;
 	m_scanlineTrigger = false;
@@ -399,7 +399,7 @@ void PPU::reset()
 
 constexpr void PPU::incrementScrollX() noexcept
 {
-	if (mask.render_background or mask.render_sprites)
+	if (m_mask.render_background or m_mask.render_sprites)
 	{
 		if (m_vramAddr.coarse_x == COARSE_X_LIMIT)
 		{
@@ -415,7 +415,7 @@ constexpr void PPU::incrementScrollX() noexcept
 
 constexpr void PPU::incrementScrollY() noexcept
 {
-	if (mask.render_background or mask.render_sprites)
+	if (m_mask.render_background or m_mask.render_sprites)
 	{
 		if (m_vramAddr.fine_y < 7)
 		{
@@ -443,7 +443,7 @@ constexpr void PPU::incrementScrollY() noexcept
 
 constexpr void PPU::transferAddressX() noexcept
 {
-	if (mask.render_background or mask.render_sprites)
+	if (m_mask.render_background or m_mask.render_sprites)
 	{
 		m_vramAddr.nametable_x = m_tramAddr.nametable_x;
 		m_vramAddr.coarse_x = m_tramAddr.coarse_x;
@@ -452,7 +452,7 @@ constexpr void PPU::transferAddressX() noexcept
 
 constexpr void PPU::transferAddressY() noexcept
 {
-	if (mask.render_background or mask.render_sprites)
+	if (m_mask.render_background or m_mask.render_sprites)
 	{
 		m_vramAddr.fine_y = m_tramAddr.fine_y;
 		m_vramAddr.nametable_y = m_tramAddr.nametable_y;
@@ -470,7 +470,7 @@ constexpr void PPU::loadBackgroundShifters() noexcept
 
 constexpr void PPU::updateShifters() noexcept
 {
-	if (mask.render_background)
+	if (m_mask.render_background)
 	{
 		bg_shifter_pattern_lo <<= 1;
 		bg_shifter_pattern_hi <<= 1;
@@ -478,7 +478,7 @@ constexpr void PPU::updateShifters() noexcept
 		bg_shifter_attrib_hi <<= 1;
 	}
 
-	if (mask.render_sprites and cycle >= 1 and cycle < 258)
+	if (m_mask.render_sprites and cycle >= 1 and cycle < 258)
 	{
 		for (int i = 0; i < m_spriteCount; i++)
 		{
@@ -515,7 +515,7 @@ constexpr void PPU::verticalBlankingLines() noexcept
 	{
 		m_status.verticalBlank = 1;
 
-		if (control.enable_nmi) {
+		if (m_control.enable_nmi) {
 			nmi = true;
 		}
 	}
@@ -526,7 +526,7 @@ void PPU::clock()
 	if (scanline >= -1 && scanline < 240)
 	{
 
-		if (scanline == 0 and cycle == 0 and m_oddFrame and (mask.render_background or mask.render_sprites))
+		if (scanline == 0 and cycle == 0 and m_oddFrame and (m_mask.render_background or m_mask.render_sprites))
 		{
 			cycle = 1;
 		}
@@ -558,13 +558,13 @@ void PPU::clock()
 				break;
 
 			case 4:
-				bg_next_tile_lsb = ppuRead((control.pattern_background << 12)
+				bg_next_tile_lsb = ppuRead((m_control.pattern_background << 12)
 					+ ((uint16_t)bg_next_tile_id << 4)
 					+ (m_vramAddr.fine_y) + 0);
 
 				break;
 			case 6:
-				bg_next_tile_msb = ppuRead((control.pattern_background << 12)
+				bg_next_tile_msb = ppuRead((m_control.pattern_background << 12)
 					+ ((uint16_t)bg_next_tile_id << 4)
 					+ (m_vramAddr.fine_y) + 8);
 				break;
@@ -607,7 +607,7 @@ void PPU::clock()
 			{
 				int16_t diff = ((int16_t)scanline - (int16_t)OAM[nOAMEntry].y);
 
-				if (diff >= 0 && diff < (control.sprite_size ? 16 : 8))
+				if (diff >= 0 && diff < (m_control.sprite_size ? 16 : 8))
 				{
 					if (m_spriteCount < 8)
 					{
@@ -634,12 +634,12 @@ void PPU::clock()
 
 				uint8_t sprite_pattern_bits_lo, sprite_pattern_bits_hi;
 				uint16_t sprite_pattern_addr_lo, sprite_pattern_addr_hi;
-				if (!control.sprite_size)
+				if (!m_control.sprite_size)
 				{
 					if (!(spriteScanline[i].attribute & 0x80))
 					{
 						sprite_pattern_addr_lo =
-							(control.pattern_sprite << 12)
+							(m_control.pattern_sprite << 12)
 							| (spriteScanline[i].id << 4)
 							| (scanline - spriteScanline[i].y);
 
@@ -647,7 +647,7 @@ void PPU::clock()
 					else
 					{
 						sprite_pattern_addr_lo =
-							(control.pattern_sprite << 12)
+							(m_control.pattern_sprite << 12)
 							| (spriteScanline[i].id << 4)
 							| (7 - (scanline - spriteScanline[i].y));
 					}
@@ -724,7 +724,7 @@ void PPU::clock()
 	uint8_t bg_pixel = 0x00;
 	uint8_t bg_palette = 0x00;
 
-	if (mask.render_background)
+	if (m_mask.render_background)
 	{
 		uint16_t bit_mux = 0x8000 >> fine_x;
 		uint8_t p0_pixel = (bg_shifter_pattern_lo & bit_mux) > 0;
@@ -738,7 +738,7 @@ void PPU::clock()
 	uint8_t fg_palette = 0x00;
 	uint8_t fg_priority = 0x00;
 
-	if (mask.render_sprites)
+	if (m_mask.render_sprites)
 	{
 
 		bSpriteZeroBeingRendered = false;
@@ -797,9 +797,9 @@ void PPU::clock()
 		}
 		if (bSpriteZeroHitPossible && bSpriteZeroBeingRendered)
 		{
-			if (mask.render_background & mask.render_sprites)
+			if (m_mask.render_background & m_mask.render_sprites)
 			{
-				if (~(mask.render_background_left | mask.render_sprites_left))
+				if (~(m_mask.render_background_left | m_mask.render_sprites_left))
 				{
 					if (cycle >= 9 && cycle < 258)
 					{
@@ -819,7 +819,7 @@ void PPU::clock()
 	sprScreen->SetPixel(cycle - 1, scanline, GetColorFromPaletteRam(palette, pixel));
 
 	cycle++;
-	if (mask.render_background || mask.render_sprites)
+	if (m_mask.render_background || m_mask.render_sprites)
 	{
 		if (cycle == 260 and scanline < 240)
 		{
