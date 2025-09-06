@@ -8,6 +8,13 @@
 namespace ppu_constants
 {
 	constexpr int TABLE_PALETTE_SIZE{ 32 };
+	constexpr int TABLE_SLOTS{ 2 };
+
+	constexpr int TABLE_PATTERN_SIZE{ 4096 };
+	using TablePattern = std::array<std::array<uint8_t, ppu_constants::TABLE_PATTERN_SIZE>, ppu_constants::TABLE_SLOTS>;
+	
+	constexpr int TABLE_NAME_SIZE{ 1024 };
+	using TableName = std::array<std::array<uint8_t, ppu_constants::TABLE_NAME_SIZE>, ppu_constants::TABLE_SLOTS>;
 }
 
 
@@ -37,8 +44,9 @@ public:
 	bool nmi = false;
 
 private:
-	uint8_t     tblName[2][1024];
-	uint8_t     tblPattern[2][4096];
+	ppu_constants::TableName tblName{};
+	//uint8_t     tblName[2][1024];
+	ppu_constants::TablePattern tblPattern{};
 	std::array<uint8_t, ppu_constants::TABLE_PALETTE_SIZE> tblPalette{};
 
 	olc::Pixel  palScreen[0x40];
