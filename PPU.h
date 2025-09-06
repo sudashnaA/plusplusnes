@@ -1,8 +1,15 @@
 #pragma once
 #include <cstdint>
+#include <array>
 #include <memory>
 #include "olcPixelGameEngine.h"
 #include "Cartridge.h"
+
+namespace ppu_constants
+{
+	constexpr int TABLE_PALETTE_SIZE{ 32 };
+}
+
 
 class PPU
 {
@@ -32,10 +39,10 @@ public:
 private:
 	uint8_t     tblName[2][1024];
 	uint8_t     tblPattern[2][4096];
-	uint8_t		tblPalette[32];
+	std::array<uint8_t, ppu_constants::TABLE_PALETTE_SIZE> tblPalette{};
 
 	olc::Pixel  palScreen[0x40];
-	olc::Sprite* sprScreen;
+	olc::Sprite* sprScreen{};
 	olc::Sprite* sprNameTable[2];
 	olc::Sprite* sprPatternTable[2];
 
