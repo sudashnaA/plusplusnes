@@ -7,14 +7,18 @@
 
 namespace
 {
-	constexpr int TABLE_PALETTE_SIZE{ 32 };
 	constexpr int TABLE_SLOTS{ 2 };
+
+	constexpr int TABLE_PALETTE_SIZE{ 32 };
+	using TablePalette = std::array<uint8_t, TABLE_PALETTE_SIZE>;
 
 	constexpr int TABLE_PATTERN_SIZE{ 4096 };
 	using TablePattern = std::array<std::array<uint8_t, TABLE_PATTERN_SIZE>, TABLE_SLOTS>;
 	
 	constexpr int TABLE_NAME_SIZE{ 1024 };
 	using TableName = std::array<std::array<uint8_t, TABLE_NAME_SIZE>, TABLE_SLOTS>;
+
+
 
 	union StatusRegister
 	{
@@ -63,7 +67,7 @@ namespace
 		uint8_t reg;
 	};
 
-	union loopyRegister
+	union LoopyRegister
 	{
 		struct
 		{
@@ -109,19 +113,19 @@ public:
 private:
 	TableName m_tblName{};
 	TablePattern m_tblPattern{};
-	std::array<uint8_t, TABLE_PALETTE_SIZE> m_tblPalette{};
+	TablePalette m_tblPalette{};
 
 	olc::Pixel  palScreen[0x40];
 	olc::Sprite* sprScreen{};
 	olc::Sprite* sprNameTable[2];
 	olc::Sprite* sprPatternTable[2];
 
-	StatusRegister m_status;
-	MaskRegister m_mask;
-	ControlRegister m_control;
+	StatusRegister m_status{};
+	MaskRegister m_mask{};
+	ControlRegister m_control{};
 
-	loopyRegister m_vramAddr{};
-	loopyRegister m_tramAddr{};
+	LoopyRegister m_vramAddr{};
+	LoopyRegister m_tramAddr{};
 	uint8_t fine_x = 0x00;
 	uint8_t address_latch = 0x00;
 	uint8_t ppu_data_buffer = 0x00;
