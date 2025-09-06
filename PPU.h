@@ -21,9 +21,9 @@ namespace
 		struct
 		{
 			uint8_t unused : 5;
-			uint8_t sprite_overflow : 1;
-			uint8_t sprite_zero_hit : 1;
-			uint8_t vertical_blank : 1;
+			uint8_t spriteOverflow : 1;
+			uint8_t spriteZeroHit : 1;
+			uint8_t verticalBlank : 1;
 		};
 
 		uint8_t reg;
@@ -67,19 +67,6 @@ private:
 	olc::Sprite* sprPatternTable[2];
 
 	StatusRegister m_status;
-	/*union
-	{
-		struct
-		{
-			uint8_t unused : 5;
-			uint8_t sprite_overflow : 1;
-			uint8_t sprite_zero_hit : 1;
-			uint8_t vertical_blank : 1;
-		};
-
-		uint8_t reg;
-	} m_status;*/
-
 
 	union
 	{
