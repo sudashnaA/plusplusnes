@@ -5,16 +5,16 @@
 #include "olcPixelGameEngine.h"
 #include "Cartridge.h"
 
-namespace ppu_constants
+namespace
 {
 	constexpr int TABLE_PALETTE_SIZE{ 32 };
 	constexpr int TABLE_SLOTS{ 2 };
 
 	constexpr int TABLE_PATTERN_SIZE{ 4096 };
-	using TablePattern = std::array<std::array<uint8_t, ppu_constants::TABLE_PATTERN_SIZE>, ppu_constants::TABLE_SLOTS>;
+	using TablePattern = std::array<std::array<uint8_t, TABLE_PATTERN_SIZE>, TABLE_SLOTS>;
 	
 	constexpr int TABLE_NAME_SIZE{ 1024 };
-	using TableName = std::array<std::array<uint8_t, ppu_constants::TABLE_NAME_SIZE>, ppu_constants::TABLE_SLOTS>;
+	using TableName = std::array<std::array<uint8_t, TABLE_NAME_SIZE>, TABLE_SLOTS>;
 }
 
 
@@ -44,9 +44,9 @@ public:
 	bool nmi = false;
 
 private:
-	ppu_constants::TableName m_tblName{};
-	ppu_constants::TablePattern m_tblPattern{};
-	std::array<uint8_t, ppu_constants::TABLE_PALETTE_SIZE> m_tblPalette{};
+	TableName m_tblName{};
+	TablePattern m_tblPattern{};
+	std::array<uint8_t, TABLE_PALETTE_SIZE> m_tblPalette{};
 
 	olc::Pixel  palScreen[0x40];
 	olc::Sprite* sprScreen{};
@@ -64,7 +64,7 @@ private:
 		};
 
 		uint8_t reg;
-	} status;
+	} m_status;
 
 
 	union

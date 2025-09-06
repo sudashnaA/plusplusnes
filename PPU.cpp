@@ -150,7 +150,7 @@ uint8_t PPU::cpuRead(uint16_t addr, bool rdonly)
 			data = mask.reg;
 			break;
 		case 0x0002:
-			data = status.reg;
+			data = m_status.reg;
 			break;
 		case 0x0003:
 			break;
@@ -171,8 +171,8 @@ uint8_t PPU::cpuRead(uint16_t addr, bool rdonly)
 		case 0x0000: break;
 		case 0x0001: break;
 		case 0x0002:
-			data = (status.reg & 0xE0) | (ppu_data_buffer & 0x1F);
-			status.vertical_blank = 0;
+			data = (m_status.reg & 0xE0) | (ppu_data_buffer & 0x1F);
+			m_status.vertical_blank = 0;
 			address_latch = 0;
 			break;
 		case 0x0003: break;
@@ -388,7 +388,7 @@ void PPU::reset()
 	bg_shifter_pattern_hi = 0x0000;
 	bg_shifter_attrib_lo = 0x0000;
 	bg_shifter_attrib_hi = 0x0000;
-	status.reg = 0x00;
+	m_status.reg = 0x00;
 	mask.reg = 0x00;
 	control.reg = 0x00;
 	m_vramAddr.reg = 0x0000;
@@ -497,9 +497,9 @@ constexpr void PPU::updateShifters() noexcept
 
 constexpr void PPU::preRenderScanline() noexcept
 {
-	status.vertical_blank = 0;
-	status.sprite_overflow = 0;
-	status.sprite_zero_hit = 0;
+	m_status.vertical_blank = 0;
+	m_status.sprite_overflow = 0;
+	m_status.sprite_zero_hit = 0;
 
 	for (int i = 0; i < 8; i++)
 	{
@@ -513,7 +513,7 @@ constexpr void PPU::verticalBlankingLines() noexcept
 	// vblank is set on the second tick of scanline 241
 	if (scanline == 241 && cycle == 1)
 	{
-		status.vertical_blank = 1;
+		m_status.vertical_blank = 1;
 
 		if (control.enable_nmi) {
 			nmi = true;
@@ -623,7 +623,7 @@ void PPU::clock()
 
 				nOAMEntry++;
 			}
-			status.sprite_overflow = (m_spriteCount > 8);
+			m_status.sprite_overflow = (m_spriteCount > 8);
 		}
 
 		if (cycle == 340)
@@ -803,14 +803,14 @@ void PPU::clock()
 				{
 					if (cycle >= 9 && cycle < 258)
 					{
-						status.sprite_zero_hit = 1;
+						m_status.sprite_zero_hit = 1;
 					}
 				}
 				else
 				{
 					if (cycle >= 1 && cycle < 258)
 					{
-						status.sprite_zero_hit = 1;
+						m_status.sprite_zero_hit = 1;
 					}
 				}
 			}
