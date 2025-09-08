@@ -380,7 +380,7 @@ void PPU::reset()
 	ppu_data_buffer = 0x00;
 	scanline = 0;
 	cycle = 0;
-	bg_next_tile_id = 0x00;
+	m_bgNextTileId = 0x00;
 	bg_next_tile_attrib = 0x00;
 	bg_next_tile_lsb = 0x00;
 	bg_next_tile_msb = 0x00;
@@ -521,6 +521,42 @@ constexpr void PPU::verticalBlankingLines() noexcept
 	}
 }
 
+void PPU::fetchTiles() noexcept
+{
+	updateShifters();
+	switch ((cycle - 1) % 8)
+	{
+	case 0:
+		loadBackgroundShifters();
+		m_bgNextTileId = ppuRead(0x2000 | (m_vramAddr.reg & 0x0FFF));
+		break;
+	case 2:
+		bg_next_tile_attrib = ppuRead(0x23C0 | (m_vramAddr.nametable_y << 11)
+			| (m_vramAddr.nametable_x << 10)
+			| ((m_vramAddr.coarse_y >> 2) << 3)
+			| (m_vramAddr.coarse_x >> 2));
+		if (m_vramAddr.coarse_y & 0x02) bg_next_tile_attrib >>= 4;
+		if (m_vramAddr.coarse_x & 0x02) bg_next_tile_attrib >>= 2;
+		bg_next_tile_attrib &= 0x03;
+		break;
+
+	case 4:
+		bg_next_tile_lsb = ppuRead((m_control.pattern_background << 12)
+			+ ((uint16_t)m_bgNextTileId << 4)
+			+ (m_vramAddr.fine_y) + 0);
+
+		break;
+	case 6:
+		bg_next_tile_msb = ppuRead((m_control.pattern_background << 12)
+			+ ((uint16_t)m_bgNextTileId << 4)
+			+ (m_vramAddr.fine_y) + 8);
+		break;
+	case 7:
+		incrementScrollX();
+		break;
+	}
+}
+
 void PPU::clock()
 {	
 	if (scanline >= -1 && scanline < 240)
@@ -540,38 +576,7 @@ void PPU::clock()
 
 		if ((cycle >= 2 and cycle < 258) or (cycle >= 321 and cycle < 338))
 		{
-			updateShifters();
-			switch ((cycle - 1) % 8)
-			{
-			case 0:
-				loadBackgroundShifters();
-				bg_next_tile_id = ppuRead(0x2000 | (m_vramAddr.reg & 0x0FFF));
-				break;
-			case 2:
-				bg_next_tile_attrib = ppuRead(0x23C0 | (m_vramAddr.nametable_y << 11)
-					| (m_vramAddr.nametable_x << 10)
-					| ((m_vramAddr.coarse_y >> 2) << 3)
-					| (m_vramAddr.coarse_x >> 2));
-				if (m_vramAddr.coarse_y & 0x02) bg_next_tile_attrib >>= 4;
-				if (m_vramAddr.coarse_x & 0x02) bg_next_tile_attrib >>= 2;
-				bg_next_tile_attrib &= 0x03;
-				break;
-
-			case 4:
-				bg_next_tile_lsb = ppuRead((m_control.pattern_background << 12)
-					+ ((uint16_t)bg_next_tile_id << 4)
-					+ (m_vramAddr.fine_y) + 0);
-
-				break;
-			case 6:
-				bg_next_tile_msb = ppuRead((m_control.pattern_background << 12)
-					+ ((uint16_t)bg_next_tile_id << 4)
-					+ (m_vramAddr.fine_y) + 8);
-				break;
-			case 7:
-				incrementScrollX();
-				break;
-			}
+			fetchTiles();
 		}
 		if (cycle == 256)
 		{
@@ -584,7 +589,7 @@ void PPU::clock()
 		}
 		if (cycle == 338 || cycle == 340)
 		{
-			bg_next_tile_id = ppuRead(0x2000 | (m_vramAddr.reg & 0x0FFF));
+			m_bgNextTileId = ppuRead(0x2000 | (m_vramAddr.reg & 0x0FFF));
 		}
 
 		if (scanline == -1 && cycle >= 280 && cycle < 305)

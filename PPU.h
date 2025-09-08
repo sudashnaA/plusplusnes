@@ -18,8 +18,6 @@ namespace
 	constexpr int TABLE_NAME_SIZE{ 1024 };
 	using TableName = std::array<std::array<uint8_t, TABLE_NAME_SIZE>, TABLE_SLOTS>;
 
-
-
 	union StatusRegister
 	{
 		struct
@@ -96,7 +94,7 @@ public:
 	olc::Sprite& GetPatternTable(uint8_t i, uint8_t palette);
 	olc::Pixel& GetColorFromPaletteRam(uint8_t palette, uint8_t pixel);
 
-	bool frameComplete = false;
+	bool frameComplete{ false };
 
 	uint8_t* pointerOAM = (uint8_t*)OAM;
 
@@ -108,7 +106,7 @@ public:
 	void connectCartridge(const std::shared_ptr<Cartridge>& cartridge);
 	void clock();
 	void reset();
-	bool nmi = false;
+	bool nmi{ false };
 
 private:
 	TableName m_tblName{};
@@ -126,12 +124,13 @@ private:
 
 	LoopyRegister m_vramAddr{};
 	LoopyRegister m_tramAddr{};
+
 	uint8_t fine_x = 0x00;
 	uint8_t address_latch = 0x00;
 	uint8_t ppu_data_buffer = 0x00;
 	int16_t scanline = 0;
 	int16_t cycle = 0;
-	uint8_t bg_next_tile_id = 0x00;
+	uint8_t m_bgNextTileId = 0x00;
 	uint8_t bg_next_tile_attrib = 0x00;
 	uint8_t bg_next_tile_lsb = 0x00;
 	uint8_t bg_next_tile_msb = 0x00;
@@ -147,6 +146,7 @@ private:
 		uint8_t attribute;
 		uint8_t x;
 	} OAM[64];
+
 	uint8_t oam_addr = 0x00;
 
 	std::shared_ptr<Cartridge> cart;
@@ -180,4 +180,5 @@ private:
 	// clock functions (scanline and cycle)
 	constexpr void preRenderScanline() noexcept;
 	constexpr void verticalBlankingLines() noexcept;
+	void fetchTiles() noexcept;
 };
