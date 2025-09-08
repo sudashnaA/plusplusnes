@@ -78,10 +78,11 @@ namespace
 			uint16_t unused : 1;
 		};
 
-		uint16_t reg = 0x0000;
+		uint16_t reg;
 	};
-}
 
+	constexpr int PAL_SCREEN_SIZE{ 64 };
+}
 
 class PPU
 {
@@ -113,7 +114,7 @@ private:
 	TablePattern m_tblPattern{};
 	TablePalette m_tblPalette{};
 
-	olc::Pixel  palScreen[0x40];
+	olc::Pixel  palScreen[PAL_SCREEN_SIZE];
 	olc::Sprite* sprScreen{};
 	olc::Sprite* sprNameTable[2];
 	olc::Sprite* sprPatternTable[2];
