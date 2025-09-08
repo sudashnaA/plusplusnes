@@ -36,13 +36,13 @@ namespace
 		struct
 		{
 			uint8_t grayscale : 1;
-			uint8_t render_background_left : 1;
-			uint8_t render_sprites_left : 1;
-			uint8_t render_background : 1;
-			uint8_t render_sprites : 1;
-			uint8_t enhance_red : 1;
-			uint8_t enhance_green : 1;
-			uint8_t enhance_blue : 1;
+			uint8_t renderBackgroundLeft : 1;
+			uint8_t renderSpritesLeft : 1;
+			uint8_t renderBackground : 1;
+			uint8_t renderSprites : 1;
+			uint8_t enhanceRed : 1;
+			uint8_t enhanceGreen : 1;
+			uint8_t enhanceBlue : 1;
 		};
 
 		uint8_t reg;
@@ -52,14 +52,14 @@ namespace
 	{
 		struct
 		{
-			uint8_t nametable_x : 1;
-			uint8_t nametable_y : 1;
-			uint8_t increment_mode : 1;
-			uint8_t pattern_sprite : 1;
-			uint8_t pattern_background : 1;
-			uint8_t sprite_size : 1;
-			uint8_t slave_mode : 1;
-			uint8_t enable_nmi : 1;
+			uint8_t nametableX : 1;
+			uint8_t nametableY : 1;
+			uint8_t incrementMode : 1;
+			uint8_t patternSprite : 1;
+			uint8_t patternBackground : 1;
+			uint8_t spriteSize : 1;
+			uint8_t slaveMode : 1;
+			uint8_t enableNmi : 1;
 		};
 
 		uint8_t reg;
@@ -70,11 +70,11 @@ namespace
 		struct
 		{
 
-			uint16_t coarse_x : 5;
-			uint16_t coarse_y : 5;
-			uint16_t nametable_x : 1;
-			uint16_t nametable_y : 1;
-			uint16_t fine_y : 3;
+			uint16_t coarseX : 5;
+			uint16_t coarseY : 5;
+			uint16_t nametableX : 1;
+			uint16_t nametableY : 1;
+			uint16_t fineY : 3;
 			uint16_t unused : 1;
 		};
 
@@ -89,10 +89,10 @@ public:
 	PPU();
 	~PPU();
 
-	olc::Sprite& GetScreen();
-	olc::Sprite& GetNameTable(uint8_t i);
-	olc::Sprite& GetPatternTable(uint8_t i, uint8_t palette);
-	olc::Pixel& GetColorFromPaletteRam(uint8_t palette, uint8_t pixel);
+	olc::Sprite& getScreen();
+	olc::Sprite& getNameTable(uint8_t i);
+	olc::Sprite& getPatternTable(uint8_t i, uint8_t palette);
+	olc::Pixel& getColorFromPaletteRam(uint8_t palette, uint8_t pixel);
 
 	bool frameComplete{ false };
 
@@ -125,21 +125,21 @@ private:
 	LoopyRegister m_vramAddr{};
 	LoopyRegister m_tramAddr{};
 
-	uint8_t fine_x = 0x00;
-	uint8_t address_latch = 0x00;
-	uint8_t ppu_data_buffer = 0x00;
-	int16_t scanline = 0;
-	int16_t cycle = 0;
-	uint8_t m_bgNextTileId = 0x00;
-	uint8_t bg_next_tile_attrib = 0x00;
-	uint8_t bg_next_tile_lsb = 0x00;
-	uint8_t bg_next_tile_msb = 0x00;
-	uint16_t bg_shifter_pattern_lo = 0x0000;
-	uint16_t bg_shifter_pattern_hi = 0x0000;
-	uint16_t bg_shifter_attrib_lo = 0x0000;
-	uint16_t bg_shifter_attrib_hi = 0x0000;
+	uint8_t m_fineX{};
+	uint8_t m_addressLatch{};
+	uint8_t m_ppuDataBuffer{};
+	int16_t m_scanline{};
+	int16_t m_cycle{};
+	uint8_t m_bgNextTileId{};
+	uint8_t m_bgNextTileAttribute{};
+	uint8_t m_bgNextTileLSB{};
+	uint8_t m_bgNextTileMSB{};
+	uint16_t m_bgShifterPatternLow{};
+	uint16_t m_bgShifterPatternHigh{};
+	uint16_t m_bgShifterAttributeLow{};
+	uint16_t m_bgShifterAttributeHigh{};
 
-	struct sObjectAttributeEntry
+	struct ObjectAttributeEntry
 	{
 		uint8_t y;
 		uint8_t id;
@@ -147,17 +147,17 @@ private:
 		uint8_t x;
 	} OAM[64];
 
-	uint8_t oam_addr = 0x00;
+	uint8_t m_oamAddr{};
 
-	std::shared_ptr<Cartridge> cart;
+	std::shared_ptr<Cartridge> cart{};
 
-	sObjectAttributeEntry spriteScanline[8];
+	ObjectAttributeEntry m_spriteScanline[8];
 	uint8_t m_spriteCount;
-	uint8_t sprite_shifter_pattern_lo[8];
-	uint8_t sprite_shifter_pattern_hi[8];
+	uint8_t m_spriteShifterPatternLow[8];
+	uint8_t m_spriteShifterPatternHigh[8];
 
-	bool bSpriteZeroHitPossible = false;
-	bool bSpriteZeroBeingRendered = false;
+	bool m_spriteZeroHitPossible{};
+	bool m_spriteZeroBeingRendered{};
 
 	bool m_scanlineTrigger{ false };
 	bool m_oddFrame{ false };

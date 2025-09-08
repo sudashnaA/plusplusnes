@@ -111,7 +111,7 @@ private:
 		if (GetKey(olc::Key::R).bPressed) nes.reset();
 
 		// Draw game
-		DrawSprite(0, 0, &nes.ppu.GetScreen(), 2);
+		DrawSprite(0, 0, &nes.ppu.getScreen(), 2);
 		return true;
 	}
 };
