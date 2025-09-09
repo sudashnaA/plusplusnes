@@ -114,10 +114,10 @@ private:
 	TablePattern m_tblPattern{};
 	TablePalette m_tblPalette{};
 
-	olc::Pixel  palScreen[PAL_SCREEN_SIZE];
-	olc::Sprite* sprScreen{};
+	std::array<olc::Pixel, PAL_SCREEN_SIZE> m_palScreen;
 	olc::Sprite* sprNameTable[2];
 	olc::Sprite* sprPatternTable[2];
+	olc::Sprite* sprScreen{};
 
 	StatusRegister m_status{};
 	MaskRegister m_mask{};
