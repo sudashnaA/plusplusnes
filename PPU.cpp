@@ -530,6 +530,28 @@ uint8_t PPU::fetchNextBackgroundTile(TileOffset offset) noexcept
 	return data;
 }
 
+uint8_t PPU::fetchNextTileAttribute() noexcept
+{
+	auto data = ppuRead(0x23C0 | (m_vramAddr.nametableY << 11)
+		| (m_vramAddr.nametableX << 10)
+		| ((m_vramAddr.coarseY >> 2) << 3)
+		| (m_vramAddr.coarseX >> 2));
+
+	if (m_vramAddr.coarseY & 0x02) 
+	{ 
+		data >>= 4;
+	}
+
+	if (m_vramAddr.coarseX & 0x02)
+	{
+		data >>= 2;
+	}
+
+	data &= 0x03;
+
+	return data;
+}
+
 void PPU::fetchTileData() noexcept
 {
 	updateShifters();
@@ -541,13 +563,7 @@ void PPU::fetchTileData() noexcept
 		m_bgNextTileId = ppuRead(0x2000 | (m_vramAddr.reg & 0x0FFF));
 	}
 	else if (action == 2) {
-		m_bgNextTileAttribute = ppuRead(0x23C0 | (m_vramAddr.nametableY << 11)
-			| (m_vramAddr.nametableX << 10)
-			| ((m_vramAddr.coarseY >> 2) << 3)
-			| (m_vramAddr.coarseX >> 2));
-			if (m_vramAddr.coarseY & 0x02) m_bgNextTileAttribute >>= 4;
-			if (m_vramAddr.coarseX & 0x02) m_bgNextTileAttribute >>= 2;
-			m_bgNextTileAttribute &= 0x03;
+		m_bgNextTileAttribute = fetchNextTileAttribute();
 	}
 	else if (action == 4) {
 		m_bgNextTileLSB = fetchNextBackgroundTile(TileOffset::LSB);
