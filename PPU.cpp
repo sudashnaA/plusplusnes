@@ -521,39 +521,38 @@ constexpr void PPU::verticalBlankingLines() noexcept
 	}
 }
 
-void PPU::fetchTiles() noexcept
+void PPU::fetchTileData() noexcept
 {
 	updateShifters();
-	switch ((m_cycle - 1) % 8)
-	{
-	case 0:
+
+	int action{ (m_cycle - 1) % 8 };
+
+	if (action == 0) {
 		loadBackgroundShifters();
 		m_bgNextTileId = ppuRead(0x2000 | (m_vramAddr.reg & 0x0FFF));
-		break;
-	case 2:
+	}
+	else if (action == 2) {
 		m_bgNextTileAttribute = ppuRead(0x23C0 | (m_vramAddr.nametableY << 11)
 			| (m_vramAddr.nametableX << 10)
 			| ((m_vramAddr.coarseY >> 2) << 3)
 			| (m_vramAddr.coarseX >> 2));
-		if (m_vramAddr.coarseY & 0x02) m_bgNextTileAttribute >>= 4;
-		if (m_vramAddr.coarseX & 0x02) m_bgNextTileAttribute >>= 2;
-		m_bgNextTileAttribute &= 0x03;
-		break;
-
-	case 4:
+			if (m_vramAddr.coarseY & 0x02) m_bgNextTileAttribute >>= 4;
+			if (m_vramAddr.coarseX & 0x02) m_bgNextTileAttribute >>= 2;
+			m_bgNextTileAttribute &= 0x03;
+	}
+	else if (action == 4) {
 		m_bgNextTileLSB = ppuRead((m_control.patternBackground << 12)
 			+ ((uint16_t)m_bgNextTileId << 4)
 			+ (m_vramAddr.fineY) + 0);
 
-		break;
-	case 6:
+	}
+	else if (action == 6) {
 		m_bgNextTileMSB = ppuRead((m_control.patternBackground << 12)
 			+ ((uint16_t)m_bgNextTileId << 4)
 			+ (m_vramAddr.fineY) + 8);
-		break;
-	case 7:
+	}
+	else if (action == 7) {
 		incrementScrollX();
-		break;
 	}
 }
 
@@ -576,7 +575,7 @@ void PPU::clock()
 
 		if ((m_cycle >= 2 and m_cycle < 258) or (m_cycle >= 321 and m_cycle < 338))
 		{
-			fetchTiles();
+			fetchTileData();
 		}
 		if (m_cycle == 256)
 		{

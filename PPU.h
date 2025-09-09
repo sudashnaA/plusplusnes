@@ -180,5 +180,5 @@ private:
 	// clock functions (scanline and cycle)
 	constexpr void preRenderScanline() noexcept;
 	constexpr void verticalBlankingLines() noexcept;
-	void fetchTiles() noexcept;
+	void fetchTileData() noexcept;
 };
