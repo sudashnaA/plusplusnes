@@ -94,6 +94,15 @@ namespace
 		LSB = 0,
 		MSB = 8,
 	};
+
+	enum class TileDataActions
+	{
+		LOAD_BACKGROUND = 0,
+		GET_ATTRIBUTE = 2,
+		BACKGROUND_LOW = 4,
+		BACKGROUND_HIGH = 6,
+		SCROLL_X = 7,
+	};
 }
 
 class PPU

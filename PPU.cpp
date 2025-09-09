@@ -1,5 +1,6 @@
 #include "PPU.h"
 #include "constants.h"
+#include "util.h"
 
 PPU::PPU()
 {
@@ -554,24 +555,29 @@ uint8_t PPU::fetchNextTileAttribute() noexcept
 
 void PPU::fetchTileData() noexcept
 {
+	using enum TileDataActions;
+
 	updateShifters();
+	auto action{ static_cast<uint8_t>((m_cycle - 1) % 8) };
 
-	int action{ (m_cycle - 1) % 8 };
-
-	if (action == 0) {
+	if (action == toUType(LOAD_BACKGROUND)) 
+	{
 		loadBackgroundShifters();
 		m_bgNextTileId = ppuRead(0x2000 | (m_vramAddr.reg & 0x0FFF));
 	}
-	else if (action == 2) {
+	else if (action == toUType(GET_ATTRIBUTE)) 
+	{
 		m_bgNextTileAttribute = fetchNextTileAttribute();
 	}
-	else if (action == 4) {
+	else if (action == toUType(BACKGROUND_LOW)) 
+	{
 		m_bgNextTileLSB = fetchNextBackgroundTile(TileOffset::LSB);
 	}
-	else if (action == 6) {
+	else if (action == toUType(BACKGROUND_HIGH)) 
+	{
 		m_bgNextTileMSB = fetchNextBackgroundTile(TileOffset::MSB);
 	}
-	else if (action == 7) {
+	else if (action == toUType(SCROLL_X)) {
 		incrementScrollX();
 	}
 }
