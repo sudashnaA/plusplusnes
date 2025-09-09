@@ -305,7 +305,7 @@ uint8_t PPU::ppuReadWrite(uint16_t addr, uint8_t data, bool read) noexcept
 {
 	addr &= 0x3FFF;
 
-	if (cart->ppuRead(addr, data))
+	if (m_cart->ppuRead(addr, data))
 	{
 
 	}
@@ -324,7 +324,7 @@ uint8_t PPU::ppuReadWrite(uint16_t addr, uint8_t data, bool read) noexcept
 	{
 		addr &= 0x0FFF;
 
-		auto index{ getTableNameIndex(addr, cart->mirror()) };
+		auto index{ getTableNameIndex(addr, m_cart->mirror()) };
 
 		// If the addr is in one of the four pages the index will return a value
 		if (index)
@@ -370,7 +370,7 @@ void PPU::ppuWrite(uint16_t addr, uint8_t data)
 
 void PPU::connectCartridge(const std::shared_ptr<Cartridge>& cartridge)
 {
-	this->cart = cartridge;
+	this->m_cart = cartridge;
 }
 
 void PPU::reset()
@@ -610,7 +610,7 @@ void PPU::clock()
 
 			while (nOAMEntry < 64 && m_spriteCount < 9)
 			{
-				int16_t diff = ((int16_t)m_scanline - (int16_t)OAM[nOAMEntry].y);
+				int16_t diff = ((int16_t)m_scanline - (int16_t)m_oam[nOAMEntry].y);
 
 				if (diff >= 0 && diff < (m_control.spriteSize ? 16 : 8))
 				{
@@ -621,7 +621,7 @@ void PPU::clock()
 							m_spriteZeroHitPossible = true;
 						}
 
-						memcpy(&m_spriteScanline[m_spriteCount], &OAM[nOAMEntry], sizeof(ObjectAttributeEntry));
+						memcpy(&m_spriteScanline[m_spriteCount], &m_oam[nOAMEntry], sizeof(ObjectAttributeEntry));
 						m_spriteCount++;
 					}
 				}
@@ -828,7 +828,7 @@ void PPU::clock()
 	{
 		if (m_cycle == 260 and m_scanline < 240)
 		{
-			cart->getMapper()->scanline();
+			m_cart->getMapper()->scanline();
 		}
 	}
 

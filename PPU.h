@@ -12,6 +12,7 @@ namespace
 	constexpr int TABLE_PATTERN_SIZE{ 4096 };
 	constexpr int PAL_SCREEN_SIZE{ 64 };
 	constexpr int TABLE_NAME_SIZE{ 1024 };
+	constexpr int OAM_SIZE{ 64 };
 
 	using TablePalette = std::array<uint8_t, TABLE_PALETTE_SIZE>;
 	using TablePattern = std::array<std::array<uint8_t, TABLE_PATTERN_SIZE>, TABLE_SLOTS>;
@@ -79,6 +80,14 @@ namespace
 
 		uint16_t reg;
 	};
+
+	struct ObjectAttributeEntry
+	{
+		uint8_t y;
+		uint8_t id;
+		uint8_t attribute;
+		uint8_t x;
+	};
 }
 
 class PPU
@@ -94,7 +103,7 @@ public:
 
 	bool frameComplete{ false };
 
-	uint8_t* pointerOAM = (uint8_t*)OAM;
+	uint8_t* pointerOAM = (uint8_t*)m_oam.data();
 
 	uint8_t cpuRead(uint16_t addr, bool rdonly = false);
 	void    cpuWrite(uint16_t addr, uint8_t  data);
@@ -137,17 +146,10 @@ private:
 	uint16_t m_bgShifterAttributeLow{};
 	uint16_t m_bgShifterAttributeHigh{};
 
-	struct ObjectAttributeEntry
-	{
-		uint8_t y;
-		uint8_t id;
-		uint8_t attribute;
-		uint8_t x;
-	} OAM[64];
-
+	std::array<ObjectAttributeEntry, OAM_SIZE> m_oam;
 	uint8_t m_oamAddr{};
 
-	std::shared_ptr<Cartridge> cart{};
+	std::shared_ptr<Cartridge> m_cart{};
 
 	ObjectAttributeEntry m_spriteScanline[8];
 	uint8_t m_spriteCount;
