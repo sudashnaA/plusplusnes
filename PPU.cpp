@@ -521,6 +521,15 @@ constexpr void PPU::verticalBlankingLines() noexcept
 	}
 }
 
+uint8_t PPU::fetchNextBackgroundTile(TileOffset offset) noexcept
+{
+	auto data = ppuRead((m_control.patternBackground << 12)
+		+ (static_cast<uint16_t>(m_bgNextTileId) << 4)
+		+ (m_vramAddr.fineY) + static_cast<uint8_t>(offset));
+
+	return data;
+}
+
 void PPU::fetchTileData() noexcept
 {
 	updateShifters();
@@ -541,15 +550,10 @@ void PPU::fetchTileData() noexcept
 			m_bgNextTileAttribute &= 0x03;
 	}
 	else if (action == 4) {
-		m_bgNextTileLSB = ppuRead((m_control.patternBackground << 12)
-			+ ((uint16_t)m_bgNextTileId << 4)
-			+ (m_vramAddr.fineY) + 0);
-
+		m_bgNextTileLSB = fetchNextBackgroundTile(TileOffset::LSB);
 	}
 	else if (action == 6) {
-		m_bgNextTileMSB = ppuRead((m_control.patternBackground << 12)
-			+ ((uint16_t)m_bgNextTileId << 4)
-			+ (m_vramAddr.fineY) + 8);
+		m_bgNextTileMSB = fetchNextBackgroundTile(TileOffset::MSB);
 	}
 	else if (action == 7) {
 		incrementScrollX();

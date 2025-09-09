@@ -88,6 +88,12 @@ namespace
 		uint8_t attribute;
 		uint8_t x;
 	};
+
+	enum class TileOffset
+	{
+		LSB = 0,
+		MSB = 8,
+	};
 }
 
 class PPU
@@ -181,4 +187,5 @@ private:
 	constexpr void preRenderScanline() noexcept;
 	constexpr void verticalBlankingLines() noexcept;
 	void fetchTileData() noexcept;
+	uint8_t fetchNextBackgroundTile(TileOffset offset) noexcept;
 };
