@@ -8,14 +8,13 @@
 namespace
 {
 	constexpr int TABLE_SLOTS{ 2 };
-
 	constexpr int TABLE_PALETTE_SIZE{ 32 };
-	using TablePalette = std::array<uint8_t, TABLE_PALETTE_SIZE>;
-
 	constexpr int TABLE_PATTERN_SIZE{ 4096 };
-	using TablePattern = std::array<std::array<uint8_t, TABLE_PATTERN_SIZE>, TABLE_SLOTS>;
-	
+	constexpr int PAL_SCREEN_SIZE{ 64 };
 	constexpr int TABLE_NAME_SIZE{ 1024 };
+
+	using TablePalette = std::array<uint8_t, TABLE_PALETTE_SIZE>;
+	using TablePattern = std::array<std::array<uint8_t, TABLE_PATTERN_SIZE>, TABLE_SLOTS>;
 	using TableName = std::array<std::array<uint8_t, TABLE_NAME_SIZE>, TABLE_SLOTS>;
 
 	union StatusRegister
@@ -80,8 +79,6 @@ namespace
 
 		uint16_t reg;
 	};
-
-	constexpr int PAL_SCREEN_SIZE{ 64 };
 }
 
 class PPU
@@ -115,9 +112,9 @@ private:
 	TablePalette m_tblPalette{};
 
 	std::array<olc::Pixel, PAL_SCREEN_SIZE> m_palScreen;
-	olc::Sprite* sprNameTable[2];
-	olc::Sprite* sprPatternTable[2];
-	olc::Sprite* sprScreen{};
+	std::array<olc::Sprite*, TABLE_SLOTS> m_sprNameTable;
+	std::array<olc::Sprite*, TABLE_SLOTS> m_sprPatternTable;
+	olc::Sprite* m_sprScreen{};
 
 	StatusRegister m_status{};
 	MaskRegister m_mask{};

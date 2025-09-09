@@ -71,27 +71,27 @@ PPU::PPU()
 	m_palScreen[0x3E] = olc::Pixel(0, 0, 0);
 	m_palScreen[0x3F] = olc::Pixel(0, 0, 0);
 
-	sprScreen = new olc::Sprite(256, 240);
-	sprNameTable[0] = new olc::Sprite(256, 240);
-	sprNameTable[1] = new olc::Sprite(256, 240);
-	sprPatternTable[0] = new olc::Sprite(128, 128);
-	sprPatternTable[1] = new olc::Sprite(128, 128);
+	m_sprScreen = new olc::Sprite(256, 240);
+	m_sprNameTable[0] = new olc::Sprite(256, 240);
+	m_sprNameTable[1] = new olc::Sprite(256, 240);
+	m_sprPatternTable[0] = new olc::Sprite(128, 128);
+	m_sprPatternTable[1] = new olc::Sprite(128, 128);
 }
 
 
 PPU::~PPU()
 {
-	delete sprScreen;
-	delete sprNameTable[0];
-	delete sprNameTable[1];
-	delete sprPatternTable[0];
-	delete sprPatternTable[1];
+	delete m_sprScreen;
+	delete m_sprNameTable[0];
+	delete m_sprNameTable[1];
+	delete m_sprPatternTable[0];
+	delete m_sprPatternTable[1];
 }
 
 
 olc::Sprite& PPU::getScreen()
 {
-	return *sprScreen;
+	return *m_sprScreen;
 }
 
 
@@ -110,7 +110,7 @@ olc::Sprite& PPU::getPatternTable(uint8_t i, uint8_t palette)
 				{
 					uint8_t pixel = (tile_lsb & 0x01) << 1 | (tile_msb & 0x01);
 					tile_lsb >>= 1; tile_msb >>= 1;
-					sprPatternTable[i]->SetPixel
+					m_sprPatternTable[i]->SetPixel
 					(
 						nTileX * 8 + (7 - col),
 						nTileY * 8 + row,
@@ -120,7 +120,7 @@ olc::Sprite& PPU::getPatternTable(uint8_t i, uint8_t palette)
 			}
 		}
 	}
-	return *sprPatternTable[i];
+	return *m_sprPatternTable[i];
 }
 
 
@@ -131,7 +131,7 @@ olc::Pixel& PPU::getColorFromPaletteRam(uint8_t palette, uint8_t pixel)
 
 olc::Sprite& PPU::getNameTable(uint8_t i)
 {
-	return *sprNameTable[i];
+	return *m_sprNameTable[i];
 }
 
 
@@ -821,7 +821,7 @@ void PPU::clock()
 			}
 		}
 	}
-	sprScreen->SetPixel(m_cycle - 1, m_scanline, getColorFromPaletteRam(palette, pixel));
+	m_sprScreen->SetPixel(m_cycle - 1, m_scanline, getColorFromPaletteRam(palette, pixel));
 
 	m_cycle++;
 	if (m_mask.renderBackground || m_mask.renderSprites)
