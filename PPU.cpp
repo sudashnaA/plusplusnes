@@ -582,6 +582,43 @@ void PPU::fetchTileData() noexcept
 	}
 }
 
+void PPU::evaluateSprites() noexcept
+{
+	std::memset(m_spriteScanline, 0xFF, 8 * sizeof(ObjectAttributeEntry));
+	m_spriteCount = 0;
+
+	for (uint8_t i = 0; i < 8; i++)
+	{
+		m_spriteShifterPatternLow[i] = 0;
+		m_spriteShifterPatternHigh[i] = 0;
+	}
+
+	uint8_t nOAMEntry = 0;
+	m_spriteZeroHitPossible = false;
+
+	while (nOAMEntry < 64 && m_spriteCount < 9)
+	{
+		int16_t diff = ((int16_t)m_scanline - (int16_t)m_oam[nOAMEntry].y);
+
+		if (diff >= 0 && diff < (m_control.spriteSize ? 16 : 8))
+		{
+			if (m_spriteCount < 8)
+			{
+				if (nOAMEntry == 0)
+				{
+					m_spriteZeroHitPossible = true;
+				}
+
+				memcpy(&m_spriteScanline[m_spriteCount], &m_oam[nOAMEntry], sizeof(ObjectAttributeEntry));
+				m_spriteCount++;
+			}
+		}
+
+		nOAMEntry++;
+	}
+	m_status.spriteOverflow = (m_spriteCount > 8);
+}
+
 void PPU::clock()
 {	
 	if (m_scanline >= -1 && m_scanline < 240)
@@ -612,48 +649,18 @@ void PPU::clock()
 			loadBackgroundShifters();
 			transferAddressX();
 		}
-		if (m_cycle == 338 || m_cycle == 340)
+		if (m_cycle == 338 or m_cycle == 340)
 		{
 			m_bgNextTileId = ppuRead(0x2000 | (m_vramAddr.reg & 0x0FFF));
 		}
 
-		if (m_scanline == -1 && m_cycle >= 280 && m_cycle < 305)
+		if (m_scanline == -1 and m_cycle >= 280 and m_cycle < 305)
 		{
 			transferAddressY();
 		}
 		if (m_cycle == 257 && m_scanline >= 0)
 		{
-			std::memset(m_spriteScanline, 0xFF, 8 * sizeof(ObjectAttributeEntry));
-			m_spriteCount = 0;
-			for (uint8_t i = 0; i < 8; i++)
-			{
-				m_spriteShifterPatternLow[i] = 0;
-				m_spriteShifterPatternHigh[i] = 0;
-			}
-			uint8_t nOAMEntry = 0;
-			m_spriteZeroHitPossible = false;
-
-			while (nOAMEntry < 64 && m_spriteCount < 9)
-			{
-				int16_t diff = ((int16_t)m_scanline - (int16_t)m_oam[nOAMEntry].y);
-
-				if (diff >= 0 && diff < (m_control.spriteSize ? 16 : 8))
-				{
-					if (m_spriteCount < 8)
-					{
-						if (nOAMEntry == 0)
-						{
-							m_spriteZeroHitPossible = true;
-						}
-
-						memcpy(&m_spriteScanline[m_spriteCount], &m_oam[nOAMEntry], sizeof(ObjectAttributeEntry));
-						m_spriteCount++;
-					}
-				}
-
-				nOAMEntry++;
-			}
-			m_status.spriteOverflow = (m_spriteCount > 8);
+			evaluateSprites();
 		}
 
 		if (m_cycle == 340)

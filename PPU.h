@@ -198,4 +198,5 @@ private:
 	void fetchTileData() noexcept;
 	uint8_t fetchNextBackgroundTile(TileOffset offset) noexcept;
 	uint8_t fetchNextTileAttribute() noexcept;
+	void evaluateSprites() noexcept;
 };
