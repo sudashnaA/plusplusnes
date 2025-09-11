@@ -588,20 +588,17 @@ void PPU::evaluateSprites() noexcept
 
 	m_spriteCount = 0;
 
-	for (uint8_t i = 0; i < 8; i++)
-	{
-		m_spriteShifterPatternLow[i] = 0;
-		m_spriteShifterPatternHigh[i] = 0;
-	}
+	m_spriteShifterPatternLow.fill(0);
+	m_spriteShifterPatternHigh.fill(0);
 
 	uint8_t nOAMEntry = 0;
 	m_spriteZeroHitPossible = false;
 
-	while (nOAMEntry < 64 && m_spriteCount < 9)
+	while (nOAMEntry < 64 and m_spriteCount < 9)
 	{
-		int16_t diff = ((int16_t)m_scanline - (int16_t)m_oam[nOAMEntry].y);
+		auto diff{ static_cast<uint16_t>(m_scanline - m_oam[nOAMEntry].y) };
 
-		if (diff >= 0 && diff < (m_control.spriteSize ? 16 : 8))
+		if (diff >= 0 and diff < (m_control.spriteSize ? 16 : 8))
 		{
 			if (m_spriteCount < 8)
 			{
@@ -610,7 +607,7 @@ void PPU::evaluateSprites() noexcept
 					m_spriteZeroHitPossible = true;
 				}
 
-				memcpy(&m_spriteScanline[m_spriteCount], &m_oam[nOAMEntry], sizeof(ObjectAttributeEntry));
+				m_spriteScanline[m_spriteCount] = m_oam[nOAMEntry];
 				m_spriteCount++;
 			}
 		}
