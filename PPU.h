@@ -14,6 +14,7 @@ namespace
 	constexpr int TABLE_NAME_SIZE{ 1024 };
 	constexpr int OAM_SIZE{ 64 };
 	constexpr int SPRITE_SCANLINE_SIZE{ 8 };
+	constexpr int SPRITE_SHIFTER_SIZE{ 8 };
 
 	using TablePalette = std::array<uint8_t, TABLE_PALETTE_SIZE>;
 	using TablePattern = std::array<std::array<uint8_t, TABLE_PATTERN_SIZE>, TABLE_SLOTS>;
@@ -167,9 +168,9 @@ private:
 
 	std::shared_ptr<Cartridge> m_cart{};
 	std::array<ObjectAttributeEntry, SPRITE_SCANLINE_SIZE> m_spriteScanline;
+	std::array<uint8_t, SPRITE_SHIFTER_SIZE> m_spriteShifterPatternLow;
+	std::array<uint8_t, SPRITE_SHIFTER_SIZE> m_spriteShifterPatternHigh;
 	uint8_t m_spriteCount;
-	uint8_t m_spriteShifterPatternLow[8];
-	uint8_t m_spriteShifterPatternHigh[8];
 
 	bool m_spriteZeroHitPossible{};
 	bool m_spriteZeroBeingRendered{};

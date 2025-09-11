@@ -12,6 +12,7 @@ constexpr auto inline toUType(E enumerator) noexcept
 	return static_cast<std::underlying_type_t<E>>(enumerator);
 }
 
+// Struct must contain POD members otherwise undefined behaviour can occur
 template<typename T, std::size_t size>
 constexpr void inline zeroPODStructArray(std::array<T, size>& arr) noexcept
 {
