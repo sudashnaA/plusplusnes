@@ -15,13 +15,18 @@
 class NES : public olc::PixelGameEngine
 {
 public:
-	NES() { sAppName = "plusplusNES"; }
+	NES(std::string_view gamePath) 
+		: m_gamePath{ gamePath }
+	{
+		sAppName = "plusplusNES"; 
+	}
 
 private:
 	// The NES
 	Bus nes;
 	std::shared_ptr<Cartridge> cart;
 	bool emulationRun = false;
+	std::string m_gamePath{};
 
 	std::list<uint16_t> audio[4];
 	float accumaltedTime = 0.0f;
@@ -43,7 +48,7 @@ private:
 	bool OnUserCreate() override
 	{
 		// Load the cartridge
-		cart = std::make_shared<Cartridge>("./mario.nes");
+		cart = std::make_shared<Cartridge>(m_gamePath);
 
 		if (!cart->imageValid())
 			return false;
@@ -120,7 +125,7 @@ NES* NES::instance = nullptr;
 
 int main()
 {
-	NES demo;
+	NES demo{"mario.nes"};
 	demo.Construct(510, 480, 2, 2);
 	demo.Start();
 	return 0;
