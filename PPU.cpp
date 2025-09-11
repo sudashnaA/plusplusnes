@@ -584,7 +584,8 @@ void PPU::fetchTileData() noexcept
 
 void PPU::evaluateSprites() noexcept
 {
-	std::memset(m_spriteScanline, 0xFF, 8 * sizeof(ObjectAttributeEntry));
+	zeroPODStructArray(m_spriteScanline);
+
 	m_spriteCount = 0;
 
 	for (uint8_t i = 0; i < 8; i++)
