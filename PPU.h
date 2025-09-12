@@ -192,6 +192,7 @@ private:
 	constexpr void transferAddressY() noexcept;
 	constexpr void loadBackgroundShifters() noexcept;
 	constexpr void updateShifters() noexcept;
+	constexpr auto flipByte(uint8_t byte) const noexcept;
 
 	// clock functions (scanline and cycle)
 	constexpr void preRenderScanline() noexcept;

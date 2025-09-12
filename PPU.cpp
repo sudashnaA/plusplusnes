@@ -414,6 +414,14 @@ constexpr void PPU::incrementScrollX() noexcept
 	}
 }
 
+constexpr auto PPU::flipByte(uint8_t byte) const noexcept
+{
+	byte = (byte & 0xF0) >> 4 | (byte & 0x0F) << 4;
+	byte = (byte & 0xCC) >> 2 | (byte & 0x33) << 2;
+	byte = (byte & 0xAA) >> 1 | (byte & 0x55) << 1;
+	return byte;
+};
+
 constexpr void PPU::incrementScrollY() noexcept
 {
 	if (m_mask.renderBackground or m_mask.renderSprites)
@@ -669,15 +677,8 @@ void PPU::prepareSpriteShiftersForNextScanline() noexcept
 
 		if (spriteScanline.attribute & 0x40)
 		{
-			auto flipbyte = [](uint8_t b)
-				{
-					b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-					b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
-					b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
-					return b;
-				};
-			spritePatternBitsLow = flipbyte(spritePatternBitsLow);
-			spritePatternBitsHigh = flipbyte(spritePatternBitsHigh);
+			spritePatternBitsLow = flipByte(spritePatternBitsLow);
+			spritePatternBitsHigh = flipByte(spritePatternBitsHigh);
 		}
 
 		m_spriteShifterPatternLow[i] = spritePatternBitsLow;
