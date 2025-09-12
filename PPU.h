@@ -202,12 +202,5 @@ private:
 	void evaluateSprites() noexcept;
 	void prepareSpriteShiftersForNextScanline() noexcept;
 
-	template<typename T, typename U, typename V>
-	constexpr auto getSpritePatternAddress(const T&& first, const U&& second, const V&& third) const noexcept;
+	constexpr auto getSpritePatternAddress(int patternTable, int cell, int row) const noexcept;
 };
-
-template<typename T, typename U, typename V>
-constexpr inline auto PPU::getSpritePatternAddress(const T&& first, const U&& second, const V&& third) const noexcept
-{
-	return (first) | (second) | (third);
-}

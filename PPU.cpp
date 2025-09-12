@@ -617,6 +617,13 @@ void PPU::evaluateSprites() noexcept
 	m_status.spriteOverflow = (m_spriteCount > 8);
 }
 
+constexpr auto PPU::getSpritePatternAddress(int patternTable, int cell, int row) const noexcept
+{
+	return static_cast<uint16_t>((patternTable << 12)
+		| (cell << 4)
+		| (row));
+}
+
 void PPU::prepareSpriteShiftersForNextScanline() noexcept
 {
 	for (uint8_t i{ 0 }; i < m_spriteCount; i++)
@@ -632,18 +639,19 @@ void PPU::prepareSpriteShiftersForNextScanline() noexcept
 		{
 			if (!(spriteScanline.attribute & 0x80))
 			{
-				spritePatternAddressLow =
-					(m_control.patternSprite << 12)
-					| (spriteScanline.id << 4)
-					| (m_scanline - spriteScanline.y);
-
+				spritePatternAddressLow = getSpritePatternAddress(
+					m_control.patternSprite, 
+					spriteScanline.id, 
+					m_scanline - spriteScanline.y
+				);
 			}
 			else
 			{
-				spritePatternAddressLow =
-					(m_control.patternSprite << 12)
-					| (spriteScanline.id << 4)
-					| (7 - (m_scanline - spriteScanline.y));
+				spritePatternAddressLow = getSpritePatternAddress(
+					m_control.patternSprite,
+					spriteScanline.id,
+					7 - (m_scanline - spriteScanline.y)
+				);
 			}
 
 		}
@@ -653,34 +661,38 @@ void PPU::prepareSpriteShiftersForNextScanline() noexcept
 			{
 				if (m_scanline - spriteScanline.y < 8)
 				{
-					spritePatternAddressLow =
-						((spriteScanline.id & 0x01) << 12)
-						| ((spriteScanline.id & 0xFE) << 4)
-						| ((m_scanline - spriteScanline.y) & 0x07);
+					spritePatternAddressLow = getSpritePatternAddress(
+						spriteScanline.id & 0x01,
+						spriteScanline.id & 0xFE,
+						(m_scanline - spriteScanline.y) & 0x07
+					);
 				}
 				else
 				{
-					spritePatternAddressLow =
-						((spriteScanline.id & 0x01) << 12)
-						| (((spriteScanline.id & 0xFE) + 1) << 4)
-						| ((m_scanline - spriteScanline.y) & 0x07);
+					spritePatternAddressLow = getSpritePatternAddress(
+						spriteScanline.id & 0x01,
+						(spriteScanline.id & 0xFE) + 1,
+						(m_scanline - spriteScanline.y) & 0x07
+					);
 				}
 			}
 			else
 			{
 				if (m_scanline - spriteScanline.y < 8)
 				{
-					spritePatternAddressLow =
-						((spriteScanline.id & 0x01) << 12)
-						| (((spriteScanline.id & 0xFE) + 1) << 4)
-						| (7 - (m_scanline - spriteScanline.y) & 0x07);
+					spritePatternAddressLow = getSpritePatternAddress(
+						spriteScanline.id & 0x01,
+						(spriteScanline.id & 0xFE) + 1,
+						(7 - (m_scanline - spriteScanline.y) & 0x07)
+					);
 				}
 				else
 				{
-					spritePatternAddressLow =
-						((spriteScanline.id & 0x01) << 12)
-						| ((spriteScanline.id & 0xFE) << 4)
-						| (7 - (m_scanline - spriteScanline.y) & 0x07);
+					spritePatternAddressLow = getSpritePatternAddress(
+						(spriteScanline.id & 0x01) << 12,
+						spriteScanline.id & 0xFE,
+						(7 - (m_scanline - spriteScanline.y) & 0x07)
+					);
 				}
 			}
 		}
