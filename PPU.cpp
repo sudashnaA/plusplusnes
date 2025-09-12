@@ -623,16 +623,16 @@ void PPU::prepareSpriteShiftersForNextScanline() noexcept
 	{
 		auto& spriteScanline{ m_spriteScanline[i] };
 
-		uint8_t sprite_pattern_bits_lo{};
-		uint8_t sprite_pattern_bits_hi{};
-		uint16_t sprite_pattern_addr_lo{};
-		uint16_t sprite_pattern_addr_hi{};
+		uint8_t spritePatternBitsLow{};
+		uint8_t spritePatternBitsHigh{};
+		uint16_t spritePatternAddressLow{};
+		uint16_t spritePatternAddressHigh{};
 
 		if (!m_control.spriteSize)
 		{
 			if (!(spriteScanline.attribute & 0x80))
 			{
-				sprite_pattern_addr_lo =
+				spritePatternAddressLow =
 					(m_control.patternSprite << 12)
 					| (spriteScanline.id << 4)
 					| (m_scanline - spriteScanline.y);
@@ -640,7 +640,7 @@ void PPU::prepareSpriteShiftersForNextScanline() noexcept
 			}
 			else
 			{
-				sprite_pattern_addr_lo =
+				spritePatternAddressLow =
 					(m_control.patternSprite << 12)
 					| (spriteScanline.id << 4)
 					| (7 - (m_scanline - spriteScanline.y));
@@ -653,14 +653,14 @@ void PPU::prepareSpriteShiftersForNextScanline() noexcept
 			{
 				if (m_scanline - spriteScanline.y < 8)
 				{
-					sprite_pattern_addr_lo =
+					spritePatternAddressLow =
 						((spriteScanline.id & 0x01) << 12)
 						| ((spriteScanline.id & 0xFE) << 4)
 						| ((m_scanline - spriteScanline.y) & 0x07);
 				}
 				else
 				{
-					sprite_pattern_addr_lo =
+					spritePatternAddressLow =
 						((spriteScanline.id & 0x01) << 12)
 						| (((spriteScanline.id & 0xFE) + 1) << 4)
 						| ((m_scanline - spriteScanline.y) & 0x07);
@@ -670,23 +670,23 @@ void PPU::prepareSpriteShiftersForNextScanline() noexcept
 			{
 				if (m_scanline - spriteScanline.y < 8)
 				{
-					sprite_pattern_addr_lo =
+					spritePatternAddressLow =
 						((spriteScanline.id & 0x01) << 12)
 						| (((spriteScanline.id & 0xFE) + 1) << 4)
 						| (7 - (m_scanline - spriteScanline.y) & 0x07);
 				}
 				else
 				{
-					sprite_pattern_addr_lo =
+					spritePatternAddressLow =
 						((spriteScanline.id & 0x01) << 12)
 						| ((spriteScanline.id & 0xFE) << 4)
 						| (7 - (m_scanline - spriteScanline.y) & 0x07);
 				}
 			}
 		}
-		sprite_pattern_addr_hi = sprite_pattern_addr_lo + 8;
-		sprite_pattern_bits_lo = ppuRead(sprite_pattern_addr_lo);
-		sprite_pattern_bits_hi = ppuRead(sprite_pattern_addr_hi);
+		spritePatternAddressHigh = spritePatternAddressLow + 8;
+		spritePatternBitsLow = ppuRead(spritePatternAddressLow);
+		spritePatternBitsHigh = ppuRead(spritePatternAddressHigh);
 		if (spriteScanline.attribute & 0x40)
 		{
 			auto flipbyte = [](uint8_t b)
@@ -696,11 +696,11 @@ void PPU::prepareSpriteShiftersForNextScanline() noexcept
 					b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
 					return b;
 				};
-			sprite_pattern_bits_lo = flipbyte(sprite_pattern_bits_lo);
-			sprite_pattern_bits_hi = flipbyte(sprite_pattern_bits_hi);
+			spritePatternBitsLow = flipbyte(spritePatternBitsLow);
+			spritePatternBitsHigh = flipbyte(spritePatternBitsHigh);
 		}
-		m_spriteShifterPatternLow[i] = sprite_pattern_bits_lo;
-		m_spriteShifterPatternHigh[i] = sprite_pattern_bits_hi;
+		m_spriteShifterPatternLow[i] = spritePatternBitsLow;
+		m_spriteShifterPatternHigh[i] = spritePatternBitsHigh;
 	}
 }
 
