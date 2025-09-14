@@ -647,29 +647,27 @@ void PPU::prepareSpriteShiftersForNextScanline() noexcept
 
 		if (!m_control.spriteSize)
 		{
-			auto rowOffset{ (!(spriteScanline.attribute & 0x80)) ? 0 : -7 };
+			auto rowOffset{ static_cast<bool>(spriteScanline.attribute & 0x80) };
 
 			spritePatternAddressLow = getSpritePatternAddress(
 				m_control.patternSprite,
 				spriteScanline.id,
-				rowOffset + (m_scanline - spriteScanline.y)
+				rowOffset ? (7 - (m_scanline - spriteScanline.y)) : (m_scanline - spriteScanline.y)
 			);
 		}
 		else
 		{
-			bool flipvertical{ !(spriteScanline.attribute & 0x80) };
-
-			auto rowOffset{ flipvertical ? 0 : -7 };
-			auto cellOffset{ (m_scanline - spriteScanline.y < 8) ? 0 : 1 };
+			auto flipvertical{ static_cast<bool>(spriteScanline.attribute & 0x80) };
+			auto cellOffset{ (m_scanline - spriteScanline.y < 8) };
 
 			if (flipvertical) {
-				auto cellOffset{ (m_scanline - spriteScanline.y < 8) ? 1 : 0 };
+				cellOffset = !cellOffset;
 			}
 
 			spritePatternAddressLow = getSpritePatternAddress(
 				spriteScanline.id & 0x01,
-				cellOffset + (spriteScanline.id & 0xFE),
-				rowOffset + ((m_scanline - spriteScanline.y) & 0x07)
+				(cellOffset ? 1 : 0) + (spriteScanline.id & 0xFE),
+				flipvertical ? ((7 - (m_scanline - spriteScanline.y)) & 0x07) : ((m_scanline - spriteScanline.y) & 0x07)
 			);
 		}
 
