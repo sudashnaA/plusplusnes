@@ -1,3 +1,4 @@
+#include <utility>
 #include "PPU.h"
 #include "constants.h"
 #include "util.h"
@@ -686,6 +687,27 @@ void PPU::prepareSpriteShiftersForNextScanline() noexcept
 	}
 }
 
+constexpr auto PPU::renderBackground() const noexcept
+{
+	uint8_t bgPixel{ 0x00 };
+	uint8_t bgPalette{ 0x00 };
+
+	if (m_mask.renderBackground)
+	{
+		uint16_t bitMux( 0x8000 >> m_fineX );
+		uint8_t p0Pixel{ (m_bgShifterPatternLow & bitMux) > 0 };
+		uint8_t p1Pixel{ (m_bgShifterPatternHigh & bitMux) > 0 };
+
+		bgPixel = (p1Pixel << 1) | p0Pixel;
+
+		uint8_t bgPal0{ (m_bgShifterAttributeLow & bitMux) > 0 };
+		uint8_t bgPal1{ (m_bgShifterAttributeHigh & bitMux) > 0 };
+		bgPalette = (bgPal1 << 1) | bgPal0;
+	}
+
+	return std::pair{ bgPixel, bgPalette };
+}
+
 void PPU::clock()
 {	
 	if (m_scanline >= -1 && m_scanline < 240)
@@ -725,7 +747,7 @@ void PPU::clock()
 		{
 			transferAddressY();
 		}
-		if (m_cycle == 257 && m_scanline >= 0)
+		if (m_cycle == 257 and m_scanline >= 0)
 		{
 			evaluateSprites();
 		}
@@ -741,24 +763,15 @@ void PPU::clock()
 	{
 	}
 
-	if (m_scanline >= 241 && m_scanline <= 260)
+	if (m_scanline >= 241 and m_scanline <= 260)
 	{
 		verticalBlankingLines();
 	}
 
-	uint8_t bg_pixel = 0x00;
-	uint8_t bg_palette = 0x00;
+	auto background = renderBackground();
+	auto bgPixel = background.first;
+	auto bgPalette = background.second;
 
-	if (m_mask.renderBackground)
-	{
-		uint16_t bit_mux = 0x8000 >> m_fineX;
-		uint8_t p0_pixel = (m_bgShifterPatternLow & bit_mux) > 0;
-		uint8_t p1_pixel = (m_bgShifterPatternHigh & bit_mux) > 0;
-		bg_pixel = (p1_pixel << 1) | p0_pixel;
-		uint8_t bg_pal0 = (m_bgShifterAttributeLow & bit_mux) > 0;
-		uint8_t bg_pal1 = (m_bgShifterAttributeHigh & bit_mux) > 0;
-		bg_palette = (bg_pal1 << 1) | bg_pal0;
-	}
 	uint8_t fg_pixel = 0x00;
 	uint8_t fg_palette = 0x00;
 	uint8_t fg_priority = 0x00;
@@ -793,22 +806,22 @@ void PPU::clock()
 	uint8_t pixel = 0x00;
 	uint8_t palette = 0x00;
 
-	if (bg_pixel == 0 && fg_pixel == 0)
+	if (bgPixel == 0 && fg_pixel == 0)
 	{
 		pixel = 0x00;
 		palette = 0x00;
 	}
-	else if (bg_pixel == 0 && fg_pixel > 0)
+	else if (bgPixel == 0 && fg_pixel > 0)
 	{
 		pixel = fg_pixel;
 		palette = fg_palette;
 	}
-	else if (bg_pixel > 0 && fg_pixel == 0)
+	else if (bgPixel > 0 && fg_pixel == 0)
 	{
-		pixel = bg_pixel;
-		palette = bg_palette;
+		pixel = bgPixel;
+		palette = bgPalette;
 	}
-	else if (bg_pixel > 0 && fg_pixel > 0)
+	else if (bgPixel > 0 && fg_pixel > 0)
 	{
 		if (fg_priority)
 		{
@@ -817,8 +830,8 @@ void PPU::clock()
 		}
 		else
 		{
-			pixel = bg_pixel;
-			palette = bg_palette;
+			pixel = bgPixel;
+			palette = bgPalette;
 		}
 		if (m_spriteZeroHitPossible && m_spriteZeroBeingRendered)
 		{

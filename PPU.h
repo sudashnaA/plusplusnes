@@ -167,10 +167,10 @@ private:
 	uint8_t m_oamAddr{};
 
 	std::shared_ptr<Cartridge> m_cart{};
-	std::array<ObjectAttributeEntry, SPRITE_SCANLINE_SIZE> m_spriteScanline;
-	std::array<uint8_t, SPRITE_SHIFTER_SIZE> m_spriteShifterPatternLow;
-	std::array<uint8_t, SPRITE_SHIFTER_SIZE> m_spriteShifterPatternHigh;
-	uint8_t m_spriteCount;
+	std::array<ObjectAttributeEntry, SPRITE_SCANLINE_SIZE> m_spriteScanline{};
+	std::array<uint8_t, SPRITE_SHIFTER_SIZE> m_spriteShifterPatternLow{};
+	std::array<uint8_t, SPRITE_SHIFTER_SIZE> m_spriteShifterPatternHigh{};
+	uint8_t m_spriteCount{};
 
 	bool m_spriteZeroHitPossible{};
 	bool m_spriteZeroBeingRendered{};
@@ -202,6 +202,6 @@ private:
 	uint8_t fetchNextTileAttribute() noexcept;
 	void evaluateSprites() noexcept;
 	void prepareSpriteShiftersForNextScanline() noexcept;
-
 	constexpr auto getSpritePatternAddress(int patternTable, int cell, int row) const noexcept;
+	constexpr auto renderBackground() const noexcept;
 };
