@@ -1,4 +1,5 @@
 #pragma once
+#include <utility>
 #include <cstdint>
 #include <array>
 #include <memory>
@@ -204,4 +205,5 @@ private:
 	void prepareSpriteShiftersForNextScanline() noexcept;
 	constexpr auto getSpritePatternAddress(int patternTable, int cell, int row) const noexcept;
 	constexpr auto renderBackground() const noexcept;
+	constexpr auto renderForeground() noexcept;
 };

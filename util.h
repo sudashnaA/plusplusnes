@@ -18,6 +18,6 @@ constexpr void inline zeroPODStructArray(std::array<T, size>& arr) noexcept
 {
 	for (auto& entry : arr)
 	{
-		std::memset(&entry, 0, sizeof(entry));
+		std::memset(&entry, 0xFF, sizeof(entry));
 	}
 }

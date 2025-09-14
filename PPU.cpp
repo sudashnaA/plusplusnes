@@ -1,4 +1,5 @@
 #include <utility>
+#include <tuple>
 #include "PPU.h"
 #include "constants.h"
 #include "util.h"
@@ -708,6 +709,43 @@ constexpr auto PPU::renderBackground() const noexcept
 	return std::pair{ bgPixel, bgPalette };
 }
 
+constexpr auto PPU::renderForeground() noexcept
+{
+	uint8_t fgPixel{ 0x00 };
+	uint8_t fgPalette{ 0x00 };
+	uint8_t fgPriority{ 0x00 };
+
+	if (m_mask.renderSprites)
+	{
+		m_spriteZeroBeingRendered = false;
+
+		for (uint8_t i{ 0 }; i < m_spriteCount; i++)
+		{
+			if (m_spriteScanline[i].x == 0)
+			{
+				uint8_t fg_pixel_lo{ (m_spriteShifterPatternLow[i] & 0x80) > 0 };
+				uint8_t fg_pixel_hi{ (m_spriteShifterPatternHigh[i] & 0x80) > 0 };
+
+				fgPixel = (fg_pixel_hi << 1) | fg_pixel_lo;
+				fgPalette = (m_spriteScanline[i].attribute & 0x03) + 0x04;
+				fgPriority = (m_spriteScanline[i].attribute & 0x20) == 0;
+
+				if (fgPixel != 0)
+				{
+					if (i == 0)
+					{
+						m_spriteZeroBeingRendered = true;
+					}
+
+					break;
+				}
+			}
+		}
+	}
+
+	return std::tuple{fgPixel, fgPalette, fgPriority};
+}
+
 void PPU::clock()
 {	
 	if (m_scanline >= -1 && m_scanline < 240)
@@ -772,61 +810,35 @@ void PPU::clock()
 	auto bgPixel = background.first;
 	auto bgPalette = background.second;
 
-	uint8_t fg_pixel = 0x00;
-	uint8_t fg_palette = 0x00;
-	uint8_t fg_priority = 0x00;
-
-	if (m_mask.renderSprites)
-	{
-
-		m_spriteZeroBeingRendered = false;
-
-		for (uint8_t i = 0; i < m_spriteCount; i++)
-		{
-			if (m_spriteScanline[i].x == 0)
-			{
-				uint8_t fg_pixel_lo = (m_spriteShifterPatternLow[i] & 0x80) > 0;
-				uint8_t fg_pixel_hi = (m_spriteShifterPatternHigh[i] & 0x80) > 0;
-				fg_pixel = (fg_pixel_hi << 1) | fg_pixel_lo;
-				fg_palette = (m_spriteScanline[i].attribute & 0x03) + 0x04;
-				fg_priority = (m_spriteScanline[i].attribute & 0x20) == 0;
-				if (fg_pixel != 0)
-				{
-					if (i == 0)
-					{
-						m_spriteZeroBeingRendered = true;
-					}
-
-					break;
-				}
-			}
-		}
-	}
+	auto foreground = renderForeground();
+	auto fgPixel = std::get<0>(foreground);
+	auto fgPalette = std::get<1>(foreground);
+	auto fgPriority = std::get<2>(foreground);
 
 	uint8_t pixel = 0x00;
 	uint8_t palette = 0x00;
 
-	if (bgPixel == 0 && fg_pixel == 0)
+	if (bgPixel == 0 && fgPixel == 0)
 	{
 		pixel = 0x00;
 		palette = 0x00;
 	}
-	else if (bgPixel == 0 && fg_pixel > 0)
+	else if (bgPixel == 0 && fgPixel > 0)
 	{
-		pixel = fg_pixel;
-		palette = fg_palette;
+		pixel = fgPixel;
+		palette = fgPalette;
 	}
-	else if (bgPixel > 0 && fg_pixel == 0)
+	else if (bgPixel > 0 && fgPixel == 0)
 	{
 		pixel = bgPixel;
 		palette = bgPalette;
 	}
-	else if (bgPixel > 0 && fg_pixel > 0)
+	else if (bgPixel > 0 && fgPixel > 0)
 	{
-		if (fg_priority)
+		if (fgPriority)
 		{
-			pixel = fg_pixel;
-			palette = fg_palette;
+			pixel = fgPixel;
+			palette = fgPalette;
 		}
 		else
 		{
