@@ -686,7 +686,7 @@ void PPU::prepareSpriteShiftersForNextScanline() noexcept
 	}
 }
 
-constexpr std::pair<uint8_t, uint8_t> PPU::renderBackground() const noexcept
+constexpr BackgroundInfo PPU::renderBackground() const noexcept
 {
 	uint8_t bgPixel{ 0x00 };
 	uint8_t bgPalette{ 0x00 };
@@ -707,7 +707,7 @@ constexpr std::pair<uint8_t, uint8_t> PPU::renderBackground() const noexcept
 	return std::pair{ bgPixel, bgPalette };
 }
 
-constexpr std::tuple<uint8_t, uint8_t, uint8_t> PPU::renderForeground() noexcept
+constexpr ForegroundInfo PPU::renderForeground() noexcept
 {
 	uint8_t fgPixel{ 0x00 };
 	uint8_t fgPalette{ 0x00 };
@@ -744,10 +744,7 @@ constexpr std::tuple<uint8_t, uint8_t, uint8_t> PPU::renderForeground() noexcept
 	return std::tuple{fgPixel, fgPalette, fgPriority};
 }
 
-constexpr std::pair<uint8_t, uint8_t> PPU::getPixelAndPalette(
-	const std::pair<uint8_t, uint8_t>& background,
-	const std::tuple<uint8_t, uint8_t, uint8_t>& foreground
-) noexcept
+constexpr std::pair<uint8_t, uint8_t> PPU::getPixelAndPalette(const BackgroundInfo& background, const ForegroundInfo& foreground) noexcept
 {
 	const auto& [bgPixel, bgPalette] = background;
 	const auto& [fgPixel, fgPalette, fgPriority] = foreground;
@@ -866,8 +863,8 @@ void PPU::clock()
 		verticalBlankingLines();
 	}
 
-	const auto background = renderBackground();
-	const auto foreground = renderForeground();
+	const BackgroundInfo background = renderBackground();
+	const ForegroundInfo foreground = renderForeground();
 
 	auto [pixel, palette] = getPixelAndPalette(background, foreground);
 

@@ -20,6 +20,8 @@ namespace
 	using TablePalette = std::array<uint8_t, TABLE_PALETTE_SIZE>;
 	using TablePattern = std::array<std::array<uint8_t, TABLE_PATTERN_SIZE>, TABLE_SLOTS>;
 	using TableName = std::array<std::array<uint8_t, TABLE_NAME_SIZE>, TABLE_SLOTS>;
+	using BackgroundInfo = std::pair<uint8_t, uint8_t>;
+	using ForegroundInfo = std::tuple<uint8_t, uint8_t, uint8_t>;
 
 	union StatusRegister
 	{
@@ -207,8 +209,5 @@ private:
 	constexpr std::pair<uint8_t, uint8_t> renderBackground() const noexcept;
 	constexpr std::tuple<uint8_t, uint8_t, uint8_t> renderForeground() noexcept;
 
-	constexpr std::pair<uint8_t, uint8_t> getPixelAndPalette(
-		const std::pair<uint8_t, uint8_t>& background,
-		const std::tuple<uint8_t, uint8_t, uint8_t>& foreground
-	) noexcept;
+	constexpr std::pair<uint8_t, uint8_t> getPixelAndPalette(const BackgroundInfo& background, const ForegroundInfo& foreground) noexcept;
 };
