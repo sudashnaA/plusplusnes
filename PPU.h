@@ -206,4 +206,9 @@ private:
 	constexpr uint16_t getSpritePatternAddress(int patternTable, int cell, int row) const noexcept;
 	constexpr std::pair<uint8_t, uint8_t> renderBackground() const noexcept;
 	constexpr std::tuple<uint8_t, uint8_t, uint8_t> renderForeground() noexcept;
+
+	constexpr std::pair<uint8_t, uint8_t> getPixelAndPalette(
+		const std::pair<uint8_t, uint8_t>& background,
+		const std::tuple<uint8_t, uint8_t, uint8_t>& foreground
+	) noexcept;
 };

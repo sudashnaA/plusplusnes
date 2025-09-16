@@ -744,6 +744,68 @@ constexpr std::tuple<uint8_t, uint8_t, uint8_t> PPU::renderForeground() noexcept
 	return std::tuple{fgPixel, fgPalette, fgPriority};
 }
 
+constexpr std::pair<uint8_t, uint8_t> PPU::getPixelAndPalette(
+	const std::pair<uint8_t, uint8_t>& background,
+	const std::tuple<uint8_t, uint8_t, uint8_t>& foreground
+) noexcept
+{
+	const auto& [bgPixel, bgPalette] = background;
+	const auto& [fgPixel, fgPalette, fgPriority] = foreground;
+
+	uint8_t pixel{};
+	uint8_t palette{};
+
+	if (bgPixel == 0 && fgPixel == 0)
+	{
+		pixel = 0x00;
+		palette = 0x00;
+	}
+	else if (bgPixel == 0 && fgPixel > 0)
+	{
+		pixel = fgPixel;
+		palette = fgPalette;
+	}
+	else if (bgPixel > 0 && fgPixel == 0)
+	{
+		pixel = bgPixel;
+		palette = bgPalette;
+	}
+	else if (bgPixel > 0 && fgPixel > 0)
+	{
+		if (fgPriority)
+		{
+			pixel = fgPixel;
+			palette = fgPalette;
+		}
+		else
+		{
+			pixel = bgPixel;
+			palette = bgPalette;
+		}
+		if (m_spriteZeroHitPossible && m_spriteZeroBeingRendered)
+		{
+			if (m_mask.renderBackground & m_mask.renderSprites)
+			{
+				if (~(m_mask.renderBackgroundLeft | m_mask.renderSpritesLeft))
+				{
+					if (m_cycle >= 9 && m_cycle < 258)
+					{
+						m_status.spriteZeroHit = 1;
+					}
+				}
+				else
+				{
+					if (m_cycle >= 1 && m_cycle < 258)
+					{
+						m_status.spriteZeroHit = 1;
+					}
+				}
+			}
+		}
+	}
+	return std::pair{pixel, palette};
+}
+
 void PPU::clock()
 {	
 	if (m_scanline >= -1 && m_scanline < 240)
@@ -813,57 +875,8 @@ void PPU::clock()
 	auto fgPalette = std::get<1>(foreground);
 	auto fgPriority = std::get<2>(foreground);
 
-	uint8_t pixel = 0x00;
-	uint8_t palette = 0x00;
+	auto [pixel, palette] = getPixelAndPalette(background, foreground);
 
-	if (bgPixel == 0 && fgPixel == 0)
-	{
-		pixel = 0x00;
-		palette = 0x00;
-	}
-	else if (bgPixel == 0 && fgPixel > 0)
-	{
-		pixel = fgPixel;
-		palette = fgPalette;
-	}
-	else if (bgPixel > 0 && fgPixel == 0)
-	{
-		pixel = bgPixel;
-		palette = bgPalette;
-	}
-	else if (bgPixel > 0 && fgPixel > 0)
-	{
-		if (fgPriority)
-		{
-			pixel = fgPixel;
-			palette = fgPalette;
-		}
-		else
-		{
-			pixel = bgPixel;
-			palette = bgPalette;
-		}
-		if (m_spriteZeroHitPossible && m_spriteZeroBeingRendered)
-		{
-			if (m_mask.renderBackground & m_mask.renderSprites)
-			{
-				if (~(m_mask.renderBackgroundLeft | m_mask.renderSpritesLeft))
-				{
-					if (m_cycle >= 9 && m_cycle < 258)
-					{
-						m_status.spriteZeroHit = 1;
-					}
-				}
-				else
-				{
-					if (m_cycle >= 1 && m_cycle < 258)
-					{
-						m_status.spriteZeroHit = 1;
-					}
-				}
-			}
-		}
-	}
 	m_sprScreen->SetPixel(m_cycle - 1, m_scanline, getColorFromPaletteRam(palette, pixel));
 
 	m_cycle++;
