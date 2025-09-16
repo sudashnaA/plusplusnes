@@ -193,7 +193,7 @@ private:
 	constexpr void transferAddressY() noexcept;
 	constexpr void loadBackgroundShifters() noexcept;
 	constexpr void updateShifters() noexcept;
-	constexpr auto flipByte(uint8_t byte) const noexcept;
+	constexpr uint8_t flipByte(uint8_t byte) const noexcept;
 
 	// clock functions (scanline and cycle)
 	constexpr void preRenderScanline() noexcept;
@@ -203,7 +203,7 @@ private:
 	uint8_t fetchNextTileAttribute() noexcept;
 	void evaluateSprites() noexcept;
 	void prepareSpriteShiftersForNextScanline() noexcept;
-	constexpr auto getSpritePatternAddress(int patternTable, int cell, int row) const noexcept;
-	constexpr auto renderBackground() const noexcept;
-	constexpr auto renderForeground() noexcept;
+	constexpr uint16_t getSpritePatternAddress(int patternTable, int cell, int row) const noexcept;
+	constexpr std::pair<uint8_t, uint8_t> renderBackground() const noexcept;
+	constexpr std::tuple<uint8_t, uint8_t, uint8_t> renderForeground() noexcept;
 };

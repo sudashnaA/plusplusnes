@@ -416,7 +416,7 @@ constexpr void PPU::incrementScrollX() noexcept
 	}
 }
 
-constexpr auto PPU::flipByte(uint8_t byte) const noexcept
+constexpr uint8_t PPU::flipByte(uint8_t byte) const noexcept
 {
 	byte = (byte & 0xF0) >> 4 | (byte & 0x0F) << 4;
 	byte = (byte & 0xCC) >> 2 | (byte & 0x33) << 2;
@@ -627,7 +627,7 @@ void PPU::evaluateSprites() noexcept
 	m_status.spriteOverflow = (m_spriteCount > 8);
 }
 
-constexpr auto PPU::getSpritePatternAddress(int patternTable, int cell, int row) const noexcept
+constexpr uint16_t PPU::getSpritePatternAddress(int patternTable, int cell, int row) const noexcept
 {
 	return static_cast<uint16_t>((patternTable << 12)
 		| (cell << 4)
@@ -686,7 +686,7 @@ void PPU::prepareSpriteShiftersForNextScanline() noexcept
 	}
 }
 
-constexpr auto PPU::renderBackground() const noexcept
+constexpr std::pair<uint8_t, uint8_t> PPU::renderBackground() const noexcept
 {
 	uint8_t bgPixel{ 0x00 };
 	uint8_t bgPalette{ 0x00 };
@@ -707,7 +707,7 @@ constexpr auto PPU::renderBackground() const noexcept
 	return std::pair{ bgPixel, bgPalette };
 }
 
-constexpr auto PPU::renderForeground() noexcept
+constexpr std::tuple<uint8_t, uint8_t, uint8_t> PPU::renderForeground() noexcept
 {
 	uint8_t fgPixel{ 0x00 };
 	uint8_t fgPalette{ 0x00 };
