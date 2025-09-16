@@ -23,6 +23,12 @@ namespace
 	using BackgroundInfo = std::pair<uint8_t, uint8_t>;
 	using ForegroundInfo = std::tuple<uint8_t, uint8_t, uint8_t>;
 
+	enum class ForegroundIndex {
+		PIXEL,
+		PALETTE,
+		PRIORITY,
+	};
+
 	union StatusRegister
 	{
 		struct
@@ -107,6 +113,15 @@ namespace
 		BACKGROUND_LOW = 4,
 		BACKGROUND_HIGH = 6,
 		SCROLL_X = 7,
+	};
+
+	enum class RenderDestination
+	{
+		TRANSPARANT,
+		BACKGROUND,
+		FOREGROUND,
+		BACKGROUND_AND_FOREGROUND,
+		INDETERMINATE,
 	};
 }
 
@@ -210,4 +225,7 @@ private:
 	constexpr std::tuple<uint8_t, uint8_t, uint8_t> renderForeground() noexcept;
 
 	constexpr std::pair<uint8_t, uint8_t> getPixelAndPalette(const BackgroundInfo& background, const ForegroundInfo& foreground) noexcept;
+
+	// Functions used determine what pixel and palette to render
+	constexpr RenderDestination selectPixelAndPalette(const BackgroundInfo& background, const ForegroundInfo& foreground) const noexcept;
 };

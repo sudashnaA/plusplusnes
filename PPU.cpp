@@ -744,6 +744,30 @@ constexpr ForegroundInfo PPU::renderForeground() noexcept
 	return std::tuple{fgPixel, fgPalette, fgPriority};
 }
 
+constexpr RenderDestination PPU::selectPixelAndPalette(const BackgroundInfo& background, const ForegroundInfo& foreground) const noexcept
+{
+	uint8_t bgPixel = background.first;
+	uint8_t fgPixel = std::get<toUType(ForegroundIndex::PIXEL)>(foreground);
+
+	if (bgPixel == 0 and fgPixel == 0)
+	{
+		return RenderDestination::TRANSPARANT;
+	}
+	else if (bgPixel == 0 and fgPixel > 0)
+	{
+		return RenderDestination::FOREGROUND;
+	}
+	else if (bgPixel > 0 and fgPixel == 0)
+	{
+		return RenderDestination::BACKGROUND;
+	}
+	else if (bgPixel > 0 and fgPixel > 0) {
+		return RenderDestination::BACKGROUND_AND_FOREGROUND;
+	}
+
+	return RenderDestination::INDETERMINATE;
+}
+
 constexpr std::pair<uint8_t, uint8_t> PPU::getPixelAndPalette(const BackgroundInfo& background, const ForegroundInfo& foreground) noexcept
 {
 	const auto& [bgPixel, bgPalette] = background;
@@ -752,22 +776,26 @@ constexpr std::pair<uint8_t, uint8_t> PPU::getPixelAndPalette(const BackgroundIn
 	uint8_t pixel{};
 	uint8_t palette{};
 
-	if (bgPixel == 0 && fgPixel == 0)
+	const RenderDestination destination{ selectPixelAndPalette(background, foreground) };
+
+	if (destination == RenderDestination::TRANSPARANT)
 	{
 		pixel = 0x00;
 		palette = 0x00;
 	}
-	else if (bgPixel == 0 && fgPixel > 0)
+	else if (destination == RenderDestination::FOREGROUND)
 	{
+		// Render foreground
 		pixel = fgPixel;
 		palette = fgPalette;
 	}
-	else if (bgPixel > 0 && fgPixel == 0)
+	else if (destination == RenderDestination::BACKGROUND)
 	{
+		// Render background
 		pixel = bgPixel;
 		palette = bgPalette;
 	}
-	else if (bgPixel > 0 && fgPixel > 0)
+	else if (destination == RenderDestination::BACKGROUND_AND_FOREGROUND)
 	{
 		if (fgPriority)
 		{
@@ -779,20 +807,21 @@ constexpr std::pair<uint8_t, uint8_t> PPU::getPixelAndPalette(const BackgroundIn
 			pixel = bgPixel;
 			palette = bgPalette;
 		}
-		if (m_spriteZeroHitPossible && m_spriteZeroBeingRendered)
+
+		if (m_spriteZeroHitPossible and m_spriteZeroBeingRendered)
 		{
 			if (m_mask.renderBackground & m_mask.renderSprites)
 			{
 				if (~(m_mask.renderBackgroundLeft | m_mask.renderSpritesLeft))
 				{
-					if (m_cycle >= 9 && m_cycle < 258)
+					if (m_cycle >= 9 and m_cycle < 258)
 					{
 						m_status.spriteZeroHit = 1;
 					}
 				}
 				else
 				{
-					if (m_cycle >= 1 && m_cycle < 258)
+					if (m_cycle >= 1 and m_cycle < 258)
 					{
 						m_status.spriteZeroHit = 1;
 					}
@@ -800,6 +829,7 @@ constexpr std::pair<uint8_t, uint8_t> PPU::getPixelAndPalette(const BackgroundIn
 			}
 		}
 	}
+
 	return std::pair{pixel, palette};
 }
 
@@ -871,7 +901,8 @@ void PPU::clock()
 	m_sprScreen->SetPixel(m_cycle - 1, m_scanline, getColorFromPaletteRam(palette, pixel));
 
 	m_cycle++;
-	if (m_mask.renderBackground || m_mask.renderSprites)
+
+	if (m_mask.renderBackground or m_mask.renderSprites)
 	{
 		if (m_cycle == 260 and m_scanline < 240)
 		{
@@ -879,11 +910,11 @@ void PPU::clock()
 		}
 	}
 
-
 	if (m_cycle >= 341)
 	{
 		m_cycle = 0;
 		m_scanline++;
+
 		if (m_scanline >= 261)
 		{
 			m_scanline = -1;
