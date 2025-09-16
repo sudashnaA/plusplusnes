@@ -866,14 +866,8 @@ void PPU::clock()
 		verticalBlankingLines();
 	}
 
-	auto background = renderBackground();
-	auto bgPixel = background.first;
-	auto bgPalette = background.second;
-
-	auto foreground = renderForeground();
-	auto fgPixel = std::get<0>(foreground);
-	auto fgPalette = std::get<1>(foreground);
-	auto fgPriority = std::get<2>(foreground);
+	const auto background = renderBackground();
+	const auto foreground = renderForeground();
 
 	auto [pixel, palette] = getPixelAndPalette(background, foreground);
 
