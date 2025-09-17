@@ -4,9 +4,6 @@
 #include <map>
 #include <functional>
 
-#ifdef LOGMODE
-#include <stdio.h>
-#endif
 class Bus;
 
 class CPU6502
@@ -40,7 +37,6 @@ public:
 	void clock();
 	bool complete();
 	void connectBus(Bus* n) { bus = n; }
-	std::map<uint16_t, std::string> disassemble(uint16_t nStart, uint16_t nStop);
 	
 
 private:
@@ -136,9 +132,4 @@ private:
 	uint8_t STX();	uint8_t STY();	uint8_t TAX();	uint8_t TAY();
 	uint8_t TSX();	uint8_t TXA();	uint8_t TXS();	uint8_t TYA();
 	uint8_t XXX();
-
-#ifdef LOGMODE
-private:
-	FILE* logfile = nullptr;
-#endif
 };

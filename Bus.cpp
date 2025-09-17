@@ -14,17 +14,18 @@ Bus::~Bus() {
 
  //ram address range is from 0x0000 to 0xffff
 
-void Bus::cpuWrite(uint16_t addr, uint8_t data) {
+void Bus::cpuWrite(uint16_t addr, uint8_t data) 
+{
 	if (cartridge->cpuWrite(addr, data)) {
 
 	}
-	else if (addr >= 0x0000 && addr <= 0x1FFF) {
+	else if (addr >= 0x0000 and addr <= 0x1FFF) {
 		cpuRam[addr & 0x07FF ] = data;
 	} 
-	else if (addr >= 0x2000 && addr <= 0x3FFF) {
+	else if (addr >= 0x2000 and addr <= 0x3FFF) {
 		ppu.cpuWrite(addr & 0x0007, data);
 	}
-	else if ((addr >= 0x4000 && addr <= 0x4013) || addr == 0x4015 || addr == 0x4017) {
+	else if ((addr >= 0x4000 and addr <= 0x4013) or addr == 0x4015 or addr == 0x4017) {
 		apu.cpuWrite(addr, data);
 	}
 	else if (addr == 0x4014) {
@@ -45,13 +46,13 @@ uint8_t Bus::cpuRead(uint16_t addr, bool breadonly) {
 	if (cartridge->cpuRead(addr, data)) {
 
 	}
-	else if (addr >= 0x0000 && addr <= 0x1FFF) {
+	else if (addr >= 0x0000 and addr <= 0x1FFF) {
 		data = cpuRam[addr & 0x07FF];
 	} 
-	else if (addr >= 0x2000 && addr <= 0x3FFF) {
+	else if (addr >= 0x2000 and addr <= 0x3FFF) {
 		data = ppu.cpuRead(addr & 0x0007, breadonly);
 	}
-	else if (addr >= 0x4016 && addr <= 0x4017)
+	else if (addr >= 0x4016 and addr <= 0x4017)
 	{
 		data = (m_controllerState[addr & 0x0001] & 0x80) > 0;
 		m_controllerState[addr & 0x0001] <<= 1;
