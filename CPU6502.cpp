@@ -186,27 +186,21 @@ void CPU6502::nmi() noexcept
 
 uint8_t CPU6502::ABS()
 {
-	uint16_t lo = read(m_pc);
-	m_pc++;
-	uint16_t hi = read(m_pc);
-	m_pc++;
+	auto [low, high] = getPCHighLowByte();
 
-	m_addrAbs = (hi << eight_bits) | lo;
+	m_addrAbs = (high << eight_bits) | low;
 
 	return 0;
 }
 
 uint8_t CPU6502::ABX()
 {
-	uint16_t lo = read(m_pc);
-	m_pc++;
-	uint16_t hi = read(m_pc);
-	m_pc++;
+	auto [low, high] = getPCHighLowByte();
 
-	m_addrAbs = (hi << eight_bits) | lo;
+	m_addrAbs = (high << eight_bits) | low;
 	m_addrAbs += m_x;
 
-	if ((m_addrAbs & 0xFF00) != (hi << eight_bits))
+	if ((m_addrAbs & 0xFF00) != (high << eight_bits))
 		return 1;
 	else
 		return 0;
@@ -214,15 +208,12 @@ uint8_t CPU6502::ABX()
 
 uint8_t CPU6502::ABY()
 {
-	uint16_t lo = read(m_pc);
-	m_pc++;
-	uint16_t hi = read(m_pc);
-	m_pc++;
+	auto [low, high] = getPCHighLowByte();
 
-	m_addrAbs = (hi << eight_bits) | lo;
+	m_addrAbs = (high << eight_bits) | low;
 	m_addrAbs += m_y;
 
-	if ((m_addrAbs & 0xFF00) != (hi << eight_bits))
+	if ((m_addrAbs & 0xFF00) != (high << eight_bits))
 		return 1;
 	else
 		return 0;
@@ -230,14 +221,11 @@ uint8_t CPU6502::ABY()
 
 uint8_t CPU6502::IND()
 {
-	uint16_t ptr_lo = read(m_pc);
-	m_pc++;
-	uint16_t ptr_hi = read(m_pc);
-	m_pc++;
+	auto [low, high] = getPCHighLowByte();
 
-	uint16_t ptr = (ptr_hi << eight_bits) | ptr_lo;
+	auto ptr { static_cast<uint16_t>((high << eight_bits) | low) };
 
-	if (ptr_lo == 0x00FF)
+	if (low == 0x00FF)
 	{
 		m_addrAbs = (read(ptr & 0xFF00) << eight_bits) | read(ptr + 0);
 	}
