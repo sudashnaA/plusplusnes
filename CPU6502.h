@@ -12,7 +12,7 @@ public:
 	CPU6502();
 	~CPU6502();
 
-	enum FLAGS6502
+	enum class FLAGS6502
 	{
 		C = (1 << 0),
 		Z = (1 << 1),
