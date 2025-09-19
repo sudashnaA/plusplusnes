@@ -72,6 +72,7 @@ private:
 	void incrementRegister(uint8_t& var);
 	void decrementRegister(uint8_t& var);
 	std::pair<uint16_t, uint16_t> getHighLowByte(uint16_t addr) const noexcept;
+	std::pair<uint16_t, uint16_t> getPCHighLowByte() noexcept;
 
 	// Function will fetch a byte from memory
 	// The shiftFn is used to peform the shift operation e.g. Arithmetic shift left

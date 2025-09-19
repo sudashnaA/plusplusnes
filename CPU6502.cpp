@@ -122,23 +122,37 @@ std::pair<uint16_t, uint16_t> CPU6502::getHighLowByte(uint16_t addr) const noexc
 	return { read(addr + 0), read(addr + 1) };
 }
 
+std::pair<uint16_t, uint16_t> CPU6502::getPCHighLowByte() noexcept
+{
+	auto low{ read(m_pc) };
+	m_pc++;
+	auto high{ read(m_pc) };
+	m_pc++;
+
+	return { low, high };
+}
+
 void CPU6502::irq() noexcept
 {
 	if (getFlag(FLAGS6502::I) == 0)
 	{
 		write(0x0100 + m_stkp, (m_pc >> eight_bits) & 0x00FF);
 		--m_stkp;
+
 		write(0x0100 + m_stkp, m_pc & 0x00FF);
 		--m_stkp;
+
 		setFlag(FLAGS6502::B, 0);
 		setFlag(FLAGS6502::U, 1);
 		setFlag(FLAGS6502::I, 1);
+
 		write(0x0100 + m_stkp, m_status);
 		--m_stkp;
+
 		m_addrAbs = 0xFFFE;
-		uint16_t lo = read(m_addrAbs + 0);
-		uint16_t hi = read(m_addrAbs + 1);
-		m_pc = (hi << eight_bits) | lo;
+		auto [low, high] = getHighLowByte(m_addrAbs);
+		m_pc = (high << eight_bits) | low;
+
 		m_cycles = 7;
 	}
 }
@@ -146,19 +160,22 @@ void CPU6502::nmi() noexcept
 {
 	write(0x0100 + m_stkp, (m_pc >> eight_bits) & 0x00FF);
 	m_stkp--;
+
 	write(0x0100 + m_stkp, m_pc & 0x00FF);
 	m_stkp--;
 
 	setFlag(FLAGS6502::B, 0);
 	setFlag(FLAGS6502::U, 1);
 	setFlag(FLAGS6502::I, 1);
+
 	write(0x0100 + m_stkp, m_status);
 	m_stkp--;
 
 	m_addrAbs = 0xFFFA;
-	uint16_t lo = read(m_addrAbs + 0);
-	uint16_t hi = read(m_addrAbs + 1);
-	m_pc = (hi << eight_bits) | lo;
+
+	auto [low, high] = getHighLowByte(m_addrAbs);
+
+	m_pc = (high << eight_bits) | low;
 
 	m_cycles = 8;
 }
