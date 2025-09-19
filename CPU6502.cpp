@@ -31,7 +31,7 @@ CPU6502::~CPU6502()
 {
 }
 
-void CPU6502::reset()
+void CPU6502::reset() noexcept
 {
 	m_addrAbs = ADDR_ABS_INITIAL_VALUE;
 
@@ -50,7 +50,7 @@ void CPU6502::reset()
 	m_cycles = 8;
 }
 
-void CPU6502::clock()
+void CPU6502::clock() noexcept
 {
 	if (m_cycles == 0)
 	{
@@ -71,30 +71,24 @@ void CPU6502::clock()
 }
 
 
-
-
-
-
-
-
 // Helper functions
 
-uint8_t CPU6502::read(uint16_t addr) const
+uint8_t CPU6502::read(uint16_t addr) const noexcept
 {
 	return bus->cpuRead(addr, false);
 }
 
-void CPU6502::write(uint16_t addr, uint8_t data)
+void CPU6502::write(uint16_t addr, uint8_t data) noexcept
 {
 	bus->cpuWrite(addr, data);
 }
 
-uint8_t CPU6502::getFlag(FLAGS6502 flag) const
+uint8_t CPU6502::getFlag(FLAGS6502 flag) const noexcept
 {
 	return ((m_status & toUType(flag)) > 0) ? 1 : 0;
 }
 
-void CPU6502::setFlag(FLAGS6502 flag, bool value)
+void CPU6502::setFlag(FLAGS6502 flag, bool value) noexcept
 {
 	if (value) {
 		m_status |= toUType(flag);
@@ -104,7 +98,7 @@ void CPU6502::setFlag(FLAGS6502 flag, bool value)
 	}
 }
 
-uint8_t CPU6502::fetch()
+uint8_t CPU6502::fetch() noexcept
 {
 	if (!(m_lookup[m_opcode].addrmode == &CPU6502::IMP)) {
 		m_fetched = read(m_addrAbs);
@@ -113,15 +107,22 @@ uint8_t CPU6502::fetch()
 	return m_fetched;
 }
 
-void CPU6502::setZifZero(const uint8_t var) {
+void CPU6502::setZifZero(const uint8_t var) noexcept 
+{
 	setFlag(FLAGS6502::Z, var == 0);
 }
 
-void CPU6502::setNifMsbSet(const uint8_t var) {
+void CPU6502::setNifMsbSet(const uint8_t var) noexcept
+{
 	setFlag(FLAGS6502::N, var & 0x80);
 }
 
-void CPU6502::irq()
+std::pair<uint16_t, uint16_t> CPU6502::getHighLowByte(uint16_t addr) const noexcept
+{
+	return { read(addr + 0), read(addr + 1) };
+}
+
+void CPU6502::irq() noexcept
 {
 	if (getFlag(FLAGS6502::I) == 0)
 	{
@@ -141,7 +142,7 @@ void CPU6502::irq()
 		m_cycles = 7;
 	}
 }
-void CPU6502::nmi()
+void CPU6502::nmi() noexcept
 {
 	write(0x0100 + m_stkp, (m_pc >> eight_bits) & 0x00FF);
 	m_stkp--;

@@ -31,10 +31,10 @@ public:
 	uint8_t getProgramCounter() const { return m_pc; };
 	uint8_t getStatus() const { return m_status; };
 
-	void reset();
-	void irq();
-	void nmi();
-	void clock();
+	void reset() noexcept;
+	void irq() noexcept;
+	void nmi() noexcept;
+	void clock() noexcept;
 	bool complete();
 	void connectBus(Bus* n) { bus = n; }
 
@@ -57,11 +57,11 @@ private:
 	uint32_t m_clockCount{ 0 };
 	Bus* bus{ nullptr };
 
-	uint8_t getFlag(FLAGS6502 flag) const;
-	void    setFlag(FLAGS6502 flag, bool val);
-	uint8_t read(uint16_t addr) const;
-	void    write(uint16_t addr, uint8_t data);
-	uint8_t fetch();
+	uint8_t getFlag(FLAGS6502 flag) const noexcept;
+	void    setFlag(FLAGS6502 flag, bool val) noexcept;
+	uint8_t read(uint16_t addr) const noexcept;
+	void    write(uint16_t addr, uint8_t data) noexcept;
+	uint8_t fetch() noexcept;
 
 	// Helper functions:
 	void branch(bool condition);
@@ -71,6 +71,7 @@ private:
 	void fetchAndCompare(uint16_t var);
 	void incrementRegister(uint8_t& var);
 	void decrementRegister(uint8_t& var);
+	std::pair<uint16_t, uint16_t> getHighLowByte(uint16_t addr) const noexcept;
 
 	// Function will fetch a byte from memory
 	// The shiftFn is used to peform the shift operation e.g. Arithmetic shift left
@@ -97,8 +98,8 @@ private:
 
 
 	// Will set Z flag is var is not set
-	void setZifZero(const uint8_t var);
-	void setNifMsbSet(const uint8_t var);
+	void setZifZero(const uint8_t var) noexcept;
+	void setNifMsbSet(const uint8_t var) noexcept;
 
 	struct INSTRUCTION
 	{

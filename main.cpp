@@ -125,7 +125,7 @@ NES* NES::instance = nullptr;
 
 int main()
 {
-	NES demo{"mario.nes"};
+	NES demo{"nestest.nes"};
 	demo.Construct(510, 480, 2, 2);
 	demo.Start();
 	return 0;
