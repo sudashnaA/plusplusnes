@@ -37,25 +37,25 @@ public:
 	void clock();
 	bool complete();
 	void connectBus(Bus* n) { bus = n; }
-	
+
 
 private:
-	uint8_t  m_a = 0x00;
-	uint8_t  m_x = 0x00;
-	uint8_t  m_y = 0x00;
-	uint8_t  m_stkp = 0x00;
-	uint16_t m_pc = 0x0000;
-	uint8_t  m_status = 0x00;
+	uint8_t  m_a{ 0x00 };
+	uint8_t  m_x{ 0x00 };
+	uint8_t  m_y{ 0x00 };
+	uint8_t  m_stkp{ 0x00 };
+	uint16_t m_pc{ 0x0000 };
+	uint8_t  m_status{ 0x00 };
 
 	
-	uint8_t  m_fetched = 0x00;
-	uint16_t m_temp = 0x0000;
-	uint16_t m_addrAbs = 0x0000;
-	uint16_t m_addrRel = 0x00;
-	uint8_t  m_opcode = 0x00;
-	uint8_t  m_cycles = 0;
-	uint32_t m_clockCount = 0;
-	Bus* bus = nullptr;
+	uint8_t  m_fetched{ 0x00 };
+	uint16_t m_temp{ 0x0000 };
+	uint16_t m_addrAbs{ 0x0000 };
+	uint16_t m_addrRel{ 0x00 };
+	uint8_t  m_opcode{ 0x00 };
+	uint8_t  m_cycles{ 0 };
+	uint32_t m_clockCount{ 0 };
+	Bus* bus{ nullptr };
 
 	uint8_t getFlag(FLAGS6502 flag) const;
 	void    setFlag(FLAGS6502 flag, bool val);
